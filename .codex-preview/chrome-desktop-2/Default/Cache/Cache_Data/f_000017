@@ -1,0 +1,401 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/@fs/C:\\Users\\MONKCSK\\Desktop\\CTF\\network-engineer-capture-the-flag\\src\\components\\mission\\CiscoTerminal.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8efb80f6"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport1_react from "/node_modules/.vite/deps/react.js?v=8efb80f6"; const useState = __vite__cjsImport1_react["useState"]; const useRef = __vite__cjsImport1_react["useRef"]; const useEffect = __vite__cjsImport1_react["useEffect"];
+import { Terminal as TerminalIcon, CornerDownLeft, Trash2 } from "/node_modules/.vite/deps/lucide-react.js?v=8efb80f6";
+import { useLanguage } from "/src/context/LanguageContext.tsx";
+export const CiscoTerminal = ({ mission }) => {
+  _s();
+  const { language } = useLanguage();
+  const [input, setInput] = useState("");
+  const [logs, setLogs] = useState(
+    [
+      {
+        id: "init-1",
+        command: "system-init",
+        output: language === "th" ? `Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.2(2)E4
+เชื่อมต่อหน้าต่างตรวจสอบกับ Switch และ Gateway ของ${mission.department}แล้ว
+พิมพ์ "help" หรือเลือกคำสั่งด้านล่างเพื่อตรวจสอบเครือข่ายจำลอง` : `Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.2(2)E4
+Diagnostic Console connected to ${mission.department} switch & gateway.
+Type "help" or click diagnostic chips below to test simulated network telemetry.`
+      }
+    ]
+  );
+  useEffect(() => {
+    setLogs([{
+      id: "init-1",
+      command: "system-init",
+      output: language === "th" ? `Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.2(2)E4
+เชื่อมต่อหน้าต่างตรวจสอบกับ Switch และ Gateway ของ${mission.department}แล้ว
+พิมพ์ "help" หรือเลือกคำสั่งด้านล่างเพื่อตรวจสอบเครือข่ายจำลอง` : `Cisco IOS Software, C2960 Software (C2960-LANBASEK9-M), Version 15.2(2)E4
+Diagnostic Console connected to ${mission.department} switch & gateway.
+Type "help" or click diagnostic chips below to test simulated network telemetry.`
+    }]);
+  }, [language, mission.id, mission.department]);
+  const endRef = useRef(null);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
+  const handleCommand = (cmdStr) => {
+    const trimmed = cmdStr.trim().toLowerCase();
+    if (!trimmed) return;
+    let output = "";
+    let isError = false;
+    if (trimmed === "clear" || trimmed === "cls") {
+      setLogs([]);
+      setInput("");
+      return;
+    } else if (trimmed === "help" || trimmed === "?") {
+      output = language === "th" ? `คำสั่งตรวจสอบที่รองรับ:
+  - ping <ip>                  ทดสอบการเชื่อมต่อด้วย ICMP
+  - traceroute <ip>            ตรวจสอบเส้นทาง
+  - ipconfig /all              แสดงค่าการ์ดเครือข่าย
+  - show ip interface brief    สรุป IP และสถานะ Interface
+  - show vlan brief            ตรวจสอบ VLAN และการกำหนด Port
+  - show interfaces trunk      ตรวจสอบ VLAN ที่ผ่าน 802.1Q Trunk
+  - show ip route              แสดง Routing Table
+  - show ip ospf neighbor      ตรวจสอบ OSPF Adjacency
+  - clear                      ล้างหน้าต่าง Terminal` : `Supported Diagnostic Commands:
+  - ping <ip>                  Test ICMP reachability
+  - traceroute <ip>            Trace route hops
+  - ipconfig /all              Display workstation network adapter details
+  - show ip interface brief    Summary of interface IP and line protocol
+  - show vlan brief            Verify VLAN database and port access mapping
+  - show interfaces trunk      Inspect 802.1Q trunk allowed VLANs
+  - show ip route              Display routing table entries
+  - show ip ospf neighbor      Inspect dynamic OSPF adjacencies
+  - clear                      Clear terminal window`;
+    } else if (trimmed.startsWith("ping")) {
+      const target = trimmed.split(" ")[1] || "192.168.10.1";
+      if (mission.id === 1) {
+        output = `Sending 5, 100-byte ICMP Echos to ${target}, timeout is 2 seconds:
+.....
+Success rate is 0 percent (0/5).
+FastEthernet0/1 link line protocol is down (no carrier).`;
+        isError = true;
+      } else if (mission.id === 4) {
+        if (target.startsWith("10.0")) {
+          output = `Pinging ${target} with 32 bytes of data:
+Request timed out.
+Destination host unreachable (Gateway 192.168.1.1 on foreign subnet).
+Packets: Sent = 4, Received = 0, Lost = 4 (100% loss).`;
+          isError = true;
+        } else {
+          output = `Pinging ${target} with 32 bytes of data:
+Reply from ${target}: bytes=32 time=1ms TTL=128
+Reply from ${target}: bytes=32 time=1ms TTL=128
+Packets: Sent = 4, Received = 4, Lost = 0 (0% loss).`;
+        }
+      } else if (mission.id === 5) {
+        output = `Pinging ${target} with 32 bytes of data:
+Request timed out.
+FastEthernet0/12 is administratively down.
+Packets: Sent = 4, Received = 0, Lost = 4 (100% loss).`;
+        isError = true;
+      } else {
+        output = `Pinging ${target} with 32 bytes of data:
+Reply from ${target}: bytes=32 time=2ms TTL=64
+Reply from ${target}: bytes=32 time=1ms TTL=64
+Success rate is 100 percent (4/4).`;
+      }
+    } else if (trimmed.includes("show ip int") || trimmed.includes("show ip interface")) {
+      output = `Interface              IP-Address      OK? Method Status                Protocol
+FastEthernet0/1        unassigned      YES unset  ${mission.id === 1 ? "down                  down" : "up                    up"}
+FastEthernet0/2        unassigned      YES unset  up                    up
+FastEthernet0/12       unassigned      YES unset  ${mission.id === 5 ? "administratively down down" : "up                    up"}
+GigabitEthernet0/1     192.168.10.1    YES manual up                    up
+GigabitEthernet0/2     10.0.0.1        YES manual up                    up`;
+    } else if (trimmed.includes("ipconfig")) {
+      output = `Windows IP Configuration
+
+Ethernet adapter Local Area Connection:
+   Connection-specific DNS Suffix  . : corp.local
+   IPv4 Address. . . . . . . . . . . : ${mission.id === 2 ? "192.168.1.55 (Wrong Subnet!)" : "192.168.10.12"}
+   Subnet Mask . . . . . . . . . . . : ${mission.id === 3 ? "255.255.255.192 (/26 Isolated!)" : "255.255.255.0"}
+   Default Gateway . . . . . . . . . : ${mission.id === 4 ? "192.168.1.1 (MISCONFIGURED)" : "192.168.10.1"}
+   DNS Servers . . . . . . . . . . . : ${mission.id === 11 ? "8.8.8.8 (Public resolver)" : "192.168.10.53"}`;
+    } else if (trimmed.includes("show vlan")) {
+      output = `VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    ${mission.id === 6 ? "Fa0/1, Fa0/2, Fa0/8 (MISMAPPED)" : "Fa0/1, Fa0/2"}
+10   Accounting                       active    Fa0/3, Fa0/4
+20   Marketing                        active    Fa0/5, Fa0/6
+30   Engineering                      active    ${mission.id === 6 ? "Fa0/18 (Missing Fa0/8!)" : "Fa0/8, Fa0/18"}`;
+    } else if (trimmed.includes("show interfaces trunk")) {
+      output = `Port        Mode         Encapsulation  Status        Native vlan
+Gi0/1       on           802.1q         trunking      ${mission.id === 12 ? "99 (MISMATCH!)" : "1"}
+
+Port        Vlans allowed on trunk
+Gi0/1       ${mission.id === 7 ? "10,20 (VLAN 40 DROPPED!)" : "1-4094"}`;
+    } else if (trimmed.includes("show ip route")) {
+      output = `Codes: L - local, C - connected, S - static, R - RIP, O - OSPF
+
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C        10.254.1.0/30 is directly connected, Serial0/0/0
+      192.168.88.0/24 is subnetted, 1 subnets
+C        192.168.88.0 is directly connected, GigabitEthernet0/0
+${mission.id === 8 ? "% Network 172.16.0.0/16 is not in table (Missing Static Route!)" : "S        172.16.0.0/16 [1/0] via 10.254.1.1"}`;
+    } else if (trimmed.includes("show ip ospf neighbor")) {
+      output = mission.id === 9 ? `% OSPF: Neighbor adjacency failed on GigabitEthernet0/0/1
+Reason: Mismatched Area ID (Local Area 0 vs Remote Area 1)` : `Neighbor ID     Pri   State           Dead Time   Address         Interface
+10.0.12.2         1   FULL/BDR        00:00:33    10.0.12.2       GigabitEthernet0/0/1`;
+    } else {
+      output = language === "th" ? `% ไม่รู้จักคำสั่ง "${trimmed}" พิมพ์ "help" เพื่อดูคำสั่งที่รองรับ` : `% Unknown diagnostic command "${trimmed}". Type "help" for a list of available verification commands.`;
+      isError = true;
+    }
+    setLogs((prev) => [...prev, {
+      id: Math.random().toString(),
+      command: cmdStr,
+      output,
+      isError
+    }]);
+    setInput("");
+  };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleCommand(input);
+    }
+  };
+  const quickChips = [
+    "ipconfig /all",
+    "ping 192.168.10.1",
+    "show ip interface brief",
+    "show vlan brief",
+    "show interfaces trunk",
+    "show ip route"
+  ];
+  return /* @__PURE__ */ jsxDEV("div", { id: "cisco-simulated-cli", className: "bg-[#0B0F14] border border-[#263241] rounded-lg overflow-hidden font-mono text-xs shadow-xl", children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "bg-[#111820] border-b border-[#263241] px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "flex min-w-0 items-center gap-2", children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "flex gap-1.5", children: [
+          /* @__PURE__ */ jsxDEV("span", { className: "w-2.5 h-2.5 rounded-full bg-[#FF5252]" }, void 0, false, {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+            lineNumber: 128,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { className: "w-2.5 h-2.5 rounded-full bg-[#F5C542]" }, void 0, false, {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+            lineNumber: 129,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("span", { className: "w-2.5 h-2.5 rounded-full bg-[#2ECC71]" }, void 0, false, {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+            lineNumber: 130,
+            columnNumber: 13
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+          lineNumber: 127,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { className: "ml-1 flex min-w-0 items-center gap-1.5 truncate text-[10px] font-bold text-[#8D9BA8] sm:ml-2 sm:text-[11px]", children: [
+          /* @__PURE__ */ jsxDEV(TerminalIcon, { className: "w-3.5 h-3.5 text-[#F5C542]" }, void 0, false, {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+            lineNumber: 133,
+            columnNumber: 13
+          }, this),
+          "Cisco IOS ",
+          language === "th" ? "หน้าต่างตรวจสอบ" : "Diagnostic Terminal",
+          " — ",
+          mission.incident_id
+        ] }, void 0, true, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+          lineNumber: 132,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+        lineNumber: 126,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(
+        "button",
+        {
+          onClick: () => setLogs([]),
+          title: language === "th" ? "ล้างหน้าจอ" : "Clear screen",
+          className: "text-[#8D9BA8] hover:text-[#F4F6F8] p-1 rounded hover:bg-[#161F29]",
+          children: /* @__PURE__ */ jsxDEV(Trash2, { className: "w-3.5 h-3.5" }, void 0, false, {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+            lineNumber: 142,
+            columnNumber: 11
+          }, this)
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+          lineNumber: 137,
+          columnNumber: 9
+        },
+        this
+      )
+    ] }, void 0, true, {
+      fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+      lineNumber: 125,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "p-4 h-64 overflow-y-auto space-y-3 bg-[#0B0F14]", children: [
+      logs.map(
+        (log) => /* @__PURE__ */ jsxDEV("div", { className: "space-y-1", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-1.5 text-[#00C2FF]", children: [
+            /* @__PURE__ */ jsxDEV("span", { children: "Switch#" }, void 0, false, {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+              lineNumber: 151,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "text-[#F4F6F8]", children: log.command }, void 0, false, {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+              lineNumber: 152,
+              columnNumber: 15
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+            lineNumber: 150,
+            columnNumber: 13
+          }, this),
+          /* @__PURE__ */ jsxDEV("pre", { className: `whitespace-pre-wrap leading-relaxed ${log.isError ? "text-[#FF5252]" : "text-[#8D9BA8]"}`, children: log.output }, void 0, false, {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+            lineNumber: 154,
+            columnNumber: 13
+          }, this)
+        ] }, log.id, true, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+          lineNumber: 149,
+          columnNumber: 9
+        }, this)
+      ),
+      /* @__PURE__ */ jsxDEV("div", { ref: endRef }, void 0, false, {
+        fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+        lineNumber: 161,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+      lineNumber: 147,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "px-3 py-2 bg-[#111820]/90 border-t border-[#263241] flex flex-wrap gap-1.5 items-center", children: [
+      /* @__PURE__ */ jsxDEV("span", { className: "text-[10px] text-[#8D9BA8] uppercase mr-1", children: language === "th" ? "คำสั่งด่วน:" : "Quick Inspect:" }, void 0, false, {
+        fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+        lineNumber: 166,
+        columnNumber: 9
+      }, this),
+      quickChips.map(
+        (chip) => /* @__PURE__ */ jsxDEV(
+          "button",
+          {
+            onClick: () => handleCommand(chip),
+            className: "text-[10px] px-2 py-0.5 rounded bg-[#161F29] hover:bg-[#263241] text-[#00C2FF] border border-[#263241] transition-colors",
+            children: chip
+          },
+          chip,
+          false,
+          {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+            lineNumber: 168,
+            columnNumber: 9
+          },
+          this
+        )
+      )
+    ] }, void 0, true, {
+      fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+      lineNumber: 165,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "p-2.5 bg-[#111820] border-t border-[#263241] flex items-center gap-2", children: [
+      /* @__PURE__ */ jsxDEV("span", { className: "text-[#00C2FF] font-bold", children: "Switch#" }, void 0, false, {
+        fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+        lineNumber: 180,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(
+        "input",
+        {
+          id: "terminal-cli-input",
+          type: "text",
+          value: input,
+          onChange: (e) => setInput(e.target.value),
+          onKeyDown: handleKeyDown,
+          placeholder: language === "th" ? 'พิมพ์คำสั่ง เช่น "ping 192.168.10.1", "show ip route", "help"...' : 'Type command (e.g. "ping 192.168.10.1", "show ip route", "help")...',
+          className: "flex-1 bg-transparent text-[#F4F6F8] focus:outline-none placeholder-[#8D9BA8]/50"
+        },
+        void 0,
+        false,
+        {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+          lineNumber: 181,
+          columnNumber: 9
+        },
+        this
+      ),
+      /* @__PURE__ */ jsxDEV(
+        "button",
+        {
+          onClick: () => handleCommand(input),
+          className: "p-1 px-2 rounded bg-[#F5C542]/10 text-[#F5C542] hover:bg-[#F5C542]/20 border border-[#F5C542]/40 transition-colors flex items-center gap-1 text-[11px]",
+          children: [
+            /* @__PURE__ */ jsxDEV("span", { children: language === "th" ? "เรียกใช้" : "Run" }, void 0, false, {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+              lineNumber: 194,
+              columnNumber: 11
+            }, this),
+            /* @__PURE__ */ jsxDEV(CornerDownLeft, { className: "w-3 h-3" }, void 0, false, {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+              lineNumber: 195,
+              columnNumber: 11
+            }, this)
+          ]
+        },
+        void 0,
+        true,
+        {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+          lineNumber: 190,
+          columnNumber: 9
+        },
+        this
+      )
+    ] }, void 0, true, {
+      fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+      lineNumber: 179,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx",
+    lineNumber: 123,
+    columnNumber: 5
+  }, this);
+};
+_s(CiscoTerminal, "eUqCeyctDfQLetVubaaes8+1Nb8=", false, function() {
+  return [useLanguage];
+});
+_c = CiscoTerminal;
+var _c;
+$RefreshReg$(_c, "CiscoTerminal");
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+function $RefreshReg$(type, id) {
+  return RefreshRuntime.register(type, "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CiscoTerminal.tsx " + id);
+}
+function $RefreshSig$() {
+  return RefreshRuntime.createSignatureFunctionForTransform();
+}
+
+//# sourceMappingURL=data:application/json;base64,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QUE7QUFBQSxNQU1BO0FBQUEsU0FqQkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxXQWtCQTtBQUFBLE9BMUVGO0FBQUE7QUFBQTtBQUFBO0FBQUEsU0EyRUE7QUFFSjtBQUFFRCxHQXZMV0YsZUFBMkM7QUFBQSxVQUNqQ0QsV0FBVztBQUFBO0FBQUEsS0FEckJDO0FBQTJDLElBQUF1QztBQUFBLGFBQUFBLElBQUEiLCJuYW1lcyI6WyJ1c2VTdGF0ZSIsInVzZVJlZiIsInVzZUVmZmVjdCIsIlRlcm1pbmFsIiwiVGVybWluYWxJY29uIiwiQ29ybmVyRG93bkxlZnQiLCJUcmFzaDIiLCJ1c2VMYW5ndWFnZSIsIkNpc2NvVGVybWluYWwiLCJtaXNzaW9uIiwiX3MiLCJsYW5ndWFnZSIsImlucHV0Iiwic2V0SW5wdXQiLCJsb2dzIiwic2V0TG9ncyIsImlkIiwiY29tbWFuZCIsIm91dHB1dCIsImRlcGFydG1lbnQiLCJlbmRSZWYiLCJjdXJyZW50Iiwic2Nyb2xsSW50b1ZpZXciLCJiZWhhdmlvciIsImhhbmRsZUNvbW1hbmQiLCJjbWRTdHIiLCJ0cmltbWVkIiwidHJpbSIsInRvTG93ZXJDYXNlIiwiaXNFcnJvciIsInN0YXJ0c1dpdGgiLCJ0YXJnZXQiLCJzcGxpdCIsImluY2x1ZGVzIiwicHJldiIsIk1hdGgiLCJyYW5kb20iLCJ0b1N0cmluZyIsImhhbmRsZUtleURvd24iLCJlIiwia2V5IiwicXVpY2tDaGlwcyIsImluY2lkZW50X2lkIiwibWFwIiwibG9nIiwiY2hpcCIsInZhbHVlIiwiX2MiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiQ2lzY29UZXJtaW5hbC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0LCB7IHVzZVN0YXRlLCB1c2VSZWYsIHVzZUVmZmVjdCB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IFRlcm1pbmFsIGFzIFRlcm1pbmFsSWNvbiwgQ29ybmVyRG93bkxlZnQsIFRyYXNoMiwgSGVscENpcmNsZSB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyBNaXNzaW9uIH0gZnJvbSAnLi4vLi4vdHlwZXMnO1xuaW1wb3J0IHsgdXNlTGFuZ3VhZ2UgfSBmcm9tICcuLi8uLi9jb250ZXh0L0xhbmd1YWdlQ29udGV4dCc7XG5cbmludGVyZmFjZSBDaXNjb1Rlcm1pbmFsUHJvcHMge1xuICBtaXNzaW9uOiBNaXNzaW9uO1xufVxuXG5pbnRlcmZhY2UgQ29tbWFuZExvZyB7XG4gIGlkOiBzdHJpbmc7XG4gIGNvbW1hbmQ6IHN0cmluZztcbiAgb3V0cHV0OiBzdHJpbmc7XG4gIGlzRXJyb3I/OiBib29sZWFuO1xufVxuXG5leHBvcnQgY29uc3QgQ2lzY29UZXJtaW5hbDogUmVhY3QuRkM8Q2lzY29UZXJtaW5hbFByb3BzPiA9ICh7IG1pc3Npb24gfSkgPT4ge1xuICBjb25zdCB7IGxhbmd1YWdlIH0gPSB1c2VMYW5ndWFnZSgpO1xuICBjb25zdCBbaW5wdXQsIHNldElucHV0XSA9IHVzZVN0YXRlKCcnKTtcbiAgY29uc3QgW2xvZ3MsIHNldExvZ3NdID0gdXNlU3RhdGU8Q29tbWFuZExvZ1tdPihbXG4gICAge1xuICAgICAgaWQ6ICdpbml0LTEnLFxuICAgICAgY29tbWFuZDogJ3N5c3RlbS1pbml0JyxcbiAgICAgIG91dHB1dDogbGFuZ3VhZ2UgPT09ICd0aCdcbiAgICAgICAgPyBgQ2lzY28gSU9TIFNvZnR3YXJlLCBDMjk2MCBTb2Z0d2FyZSAoQzI5NjAtTEFOQkFTRUs5LU0pLCBWZXJzaW9uIDE1LjIoMilFNFxcbuC5gOC4iuC4t+C5iOC4reC4oeC4leC5iOC4reC4q+C4meC5ieC4suC4leC5iOC4suC4h+C4leC4o+C4p+C4iOC4quC4reC4muC4geC4seC4miBTd2l0Y2gg4LmB4Lil4LiwIEdhdGV3YXkg4LiC4Lit4LiHJHttaXNzaW9uLmRlcGFydG1lbnR94LmB4Lil4LmJ4LinXFxu4Lie4Li04Lih4Lie4LmMIFwiaGVscFwiIOC4q+C4o+C4t+C4reC5gOC4peC4t+C4reC4geC4hOC4s+C4quC4seC5iOC4h+C4lOC5ieC4suC4meC4peC5iOC4suC4h+C5gOC4nuC4t+C5iOC4reC4leC4o+C4p+C4iOC4quC4reC4muC5gOC4hOC4o+C4t+C4reC4guC5iOC4suC4ouC4iOC4s+C4peC4reC4h2BcbiAgICAgICAgOiBgQ2lzY28gSU9TIFNvZnR3YXJlLCBDMjk2MCBTb2Z0d2FyZSAoQzI5NjAtTEFOQkFTRUs5LU0pLCBWZXJzaW9uIDE1LjIoMilFNFxcbkRpYWdub3N0aWMgQ29uc29sZSBjb25uZWN0ZWQgdG8gJHttaXNzaW9uLmRlcGFydG1lbnR9IHN3aXRjaCAmIGdhdGV3YXkuXFxuVHlwZSBcImhlbHBcIiBvciBjbGljayBkaWFnbm9zdGljIGNoaXBzIGJlbG93IHRvIHRlc3Qgc2ltdWxhdGVkIG5ldHdvcmsgdGVsZW1ldHJ5LmBcbiAgICB9XG4gIF0pO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgc2V0TG9ncyhbe1xuICAgICAgaWQ6ICdpbml0LTEnLFxuICAgICAgY29tbWFuZDogJ3N5c3RlbS1pbml0JyxcbiAgICAgIG91dHB1dDogbGFuZ3VhZ2UgPT09ICd0aCdcbiAgICAgICAgPyBgQ2lzY28gSU9TIFNvZnR3YXJlLCBDMjk2MCBTb2Z0d2FyZSAoQzI5NjAtTEFOQkFTRUs5LU0pLCBWZXJzaW9uIDE1LjIoMilFNFxcbuC5gOC4iuC4t+C5iOC4reC4oeC4leC5iOC4reC4q+C4meC5ieC4suC4leC5iOC4suC4h+C4leC4o+C4p+C4iOC4quC4reC4muC4geC4seC4miBTd2l0Y2gg4LmB4Lil4LiwIEdhdGV3YXkg4LiC4Lit4LiHJHttaXNzaW9uLmRlcGFydG1lbnR94LmB4Lil4LmJ4LinXFxu4Lie4Li04Lih4Lie4LmMIFwiaGVscFwiIOC4q+C4o+C4t+C4reC5gOC4peC4t+C4reC4geC4hOC4s+C4quC4seC5iOC4h+C4lOC5ieC4suC4meC4peC5iOC4suC4h+C5gOC4nuC4t+C5iOC4reC4leC4o+C4p+C4iOC4quC4reC4muC5gOC4hOC4o+C4t+C4reC4guC5iOC4suC4ouC4iOC4s+C4peC4reC4h2BcbiAgICAgICAgOiBgQ2lzY28gSU9TIFNvZnR3YXJlLCBDMjk2MCBTb2Z0d2FyZSAoQzI5NjAtTEFOQkFTRUs5LU0pLCBWZXJzaW9uIDE1LjIoMilFNFxcbkRpYWdub3N0aWMgQ29uc29sZSBjb25uZWN0ZWQgdG8gJHttaXNzaW9uLmRlcGFydG1lbnR9IHN3aXRjaCAmIGdhdGV3YXkuXFxuVHlwZSBcImhlbHBcIiBvciBjbGljayBkaWFnbm9zdGljIGNoaXBzIGJlbG93IHRvIHRlc3Qgc2ltdWxhdGVkIG5ldHdvcmsgdGVsZW1ldHJ5LmBcbiAgICB9XSk7XG4gIH0sIFtsYW5ndWFnZSwgbWlzc2lvbi5pZCwgbWlzc2lvbi5kZXBhcnRtZW50XSk7XG5cbiAgY29uc3QgZW5kUmVmID0gdXNlUmVmPEhUTUxEaXZFbGVtZW50PihudWxsKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGVuZFJlZi5jdXJyZW50Py5zY3JvbGxJbnRvVmlldyh7IGJlaGF2aW9yOiAnc21vb3RoJyB9KTtcbiAgfSwgW2xvZ3NdKTtcblxuICBjb25zdCBoYW5kbGVDb21tYW5kID0gKGNtZFN0cjogc3RyaW5nKSA9PiB7XG4gICAgY29uc3QgdHJpbW1lZCA9IGNtZFN0ci50cmltKCkudG9Mb3dlckNhc2UoKTtcbiAgICBpZiAoIXRyaW1tZWQpIHJldHVybjtcblxuICAgIGxldCBvdXRwdXQgPSAnJztcbiAgICBsZXQgaXNFcnJvciA9IGZhbHNlO1xuXG4gICAgaWYgKHRyaW1tZWQgPT09ICdjbGVhcicgfHwgdHJpbW1lZCA9PT0gJ2NscycpIHtcbiAgICAgIHNldExvZ3MoW10pO1xuICAgICAgc2V0SW5wdXQoJycpO1xuICAgICAgcmV0dXJuO1xuICAgIH0gZWxzZSBpZiAodHJpbW1lZCA9PT0gJ2hlbHAnIHx8IHRyaW1tZWQgPT09ICc/Jykge1xuICAgICAgb3V0cHV0ID0gbGFuZ3VhZ2UgPT09ICd0aCdcbiAgICAgICAgPyBg4LiE4Liz4Liq4Lix4LmI4LiH4LiV4Lij4Lin4LiI4Liq4Lit4Lia4LiX4Li14LmI4Lij4Lit4LiH4Lij4Lix4LiaOlxcbiAgLSBwaW5nIDxpcD4gICAgICAgICAgICAgICAgICDguJfguJTguKrguK3guJrguIHguLLguKPguYDguIrguLfguYjguK3guKHguJXguYjguK3guJTguYnguKfguKIgSUNNUFxcbiAgLSB0cmFjZXJvdXRlIDxpcD4gICAgICAgICAgICDguJXguKPguKfguIjguKrguK3guJrguYDguKrguYnguJnguJfguLLguIdcXG4gIC0gaXBjb25maWcgL2FsbCAgICAgICAgICAgICAg4LmB4Liq4LiU4LiH4LiE4LmI4Liy4LiB4Liy4Lij4LmM4LiU4LmA4LiE4Lij4Li34Lit4LiC4LmI4Liy4LiiXFxuICAtIHNob3cgaXAgaW50ZXJmYWNlIGJyaWVmICAgIOC4quC4o+C4uOC4myBJUCDguYHguKXguLDguKrguJbguLLguJnguLAgSW50ZXJmYWNlXFxuICAtIHNob3cgdmxhbiBicmllZiAgICAgICAgICAgIOC4leC4o+C4p+C4iOC4quC4reC4miBWTEFOIOC5geC4peC4sOC4geC4suC4o+C4geC4s+C4q+C4meC4lCBQb3J0XFxuICAtIHNob3cgaW50ZXJmYWNlcyB0cnVuayAgICAgIOC4leC4o+C4p+C4iOC4quC4reC4miBWTEFOIOC4l+C4teC5iOC4nOC5iOC4suC4mSA4MDIuMVEgVHJ1bmtcXG4gIC0gc2hvdyBpcCByb3V0ZSAgICAgICAgICAgICAg4LmB4Liq4LiU4LiHIFJvdXRpbmcgVGFibGVcXG4gIC0gc2hvdyBpcCBvc3BmIG5laWdoYm9yICAgICAg4LiV4Lij4Lin4LiI4Liq4Lit4LiaIE9TUEYgQWRqYWNlbmN5XFxuICAtIGNsZWFyICAgICAgICAgICAgICAgICAgICAgIOC4peC5ieC4suC4h+C4q+C4meC5ieC4suC4leC5iOC4suC4hyBUZXJtaW5hbGBcbiAgICAgICAgOiBgU3VwcG9ydGVkIERpYWdub3N0aWMgQ29tbWFuZHM6XFxuICAtIHBpbmcgPGlwPiAgICAgICAgICAgICAgICAgIFRlc3QgSUNNUCByZWFjaGFiaWxpdHlcXG4gIC0gdHJhY2Vyb3V0ZSA8aXA+ICAgICAgICAgICAgVHJhY2Ugcm91dGUgaG9wc1xcbiAgLSBpcGNvbmZpZyAvYWxsICAgICAgICAgICAgICBEaXNwbGF5IHdvcmtzdGF0aW9uIG5ldHdvcmsgYWRhcHRlciBkZXRhaWxzXFxuICAtIHNob3cgaXAgaW50ZXJmYWNlIGJyaWVmICAgIFN1bW1hcnkgb2YgaW50ZXJmYWNlIElQIGFuZCBsaW5lIHByb3RvY29sXFxuICAtIHNob3cgdmxhbiBicmllZiAgICAgICAgICAgIFZlcmlmeSBWTEFOIGRhdGFiYXNlIGFuZCBwb3J0IGFjY2VzcyBtYXBwaW5nXFxuICAtIHNob3cgaW50ZXJmYWNlcyB0cnVuayAgICAgIEluc3BlY3QgODAyLjFRIHRydW5rIGFsbG93ZWQgVkxBTnNcXG4gIC0gc2hvdyBpcCByb3V0ZSAgICAgICAgICAgICAgRGlzcGxheSByb3V0aW5nIHRhYmxlIGVudHJpZXNcXG4gIC0gc2hvdyBpcCBvc3BmIG5laWdoYm9yICAgICAgSW5zcGVjdCBkeW5hbWljIE9TUEYgYWRqYWNlbmNpZXNcXG4gIC0gY2xlYXIgICAgICAgICAgICAgICAgICAgICAgQ2xlYXIgdGVybWluYWwgd2luZG93YDtcbiAgICB9IGVsc2UgaWYgKHRyaW1tZWQuc3RhcnRzV2l0aCgncGluZycpKSB7XG4gICAgICBjb25zdCB0YXJnZXQgPSB0cmltbWVkLnNwbGl0KCcgJylbMV0gfHwgJzE5Mi4xNjguMTAuMSc7XG4gICAgICBpZiAobWlzc2lvbi5pZCA9PT0gMSkge1xuICAgICAgICBvdXRwdXQgPSBgU2VuZGluZyA1LCAxMDAtYnl0ZSBJQ01QIEVjaG9zIHRvICR7dGFyZ2V0fSwgdGltZW91dCBpcyAyIHNlY29uZHM6XFxuLi4uLi5cXG5TdWNjZXNzIHJhdGUgaXMgMCBwZXJjZW50ICgwLzUpLlxcbkZhc3RFdGhlcm5ldDAvMSBsaW5rIGxpbmUgcHJvdG9jb2wgaXMgZG93biAobm8gY2FycmllcikuYDtcbiAgICAgICAgaXNFcnJvciA9IHRydWU7XG4gICAgICB9IGVsc2UgaWYgKG1pc3Npb24uaWQgPT09IDQpIHtcbiAgICAgICAgaWYgKHRhcmdldC5zdGFydHNXaXRoKCcxMC4wJykpIHtcbiAgICAgICAgICBvdXRwdXQgPSBgUGluZ2luZyAke3RhcmdldH0gd2l0aCAzMiBieXRlcyBvZiBkYXRhOlxcblJlcXVlc3QgdGltZWQgb3V0LlxcbkRlc3RpbmF0aW9uIGhvc3QgdW5yZWFjaGFibGUgKEdhdGV3YXkgMTkyLjE2OC4xLjEgb24gZm9yZWlnbiBzdWJuZXQpLlxcblBhY2tldHM6IFNlbnQgPSA0LCBSZWNlaXZlZCA9IDAsIExvc3QgPSA0ICgxMDAlIGxvc3MpLmA7XG4gICAgICAgICAgaXNFcnJvciA9IHRydWU7XG4gICAgICAgIH0gZWxzZSB7XG4gICAgICAgICAgb3V0cHV0ID0gYFBpbmdpbmcgJHt0YXJnZXR9IHdpdGggMzIgYnl0ZXMgb2YgZGF0YTpcXG5SZXBseSBmcm9tICR7dGFyZ2V0fTogYnl0ZXM9MzIgdGltZT0xbXMgVFRMPTEyOFxcblJlcGx5IGZyb20gJHt0YXJnZXR9OiBieXRlcz0zMiB0aW1lPTFtcyBUVEw9MTI4XFxuUGFja2V0czogU2VudCA9IDQsIFJlY2VpdmVkID0gNCwgTG9zdCA9IDAgKDAlIGxvc3MpLmA7XG4gICAgICAgIH1cbiAgICAgIH0gZWxzZSBpZiAobWlzc2lvbi5pZCA9PT0gNSkge1xuICAgICAgICBvdXRwdXQgPSBgUGluZ2luZyAke3RhcmdldH0gd2l0aCAzMiBieXRlcyBvZiBkYXRhOlxcblJlcXVlc3QgdGltZWQgb3V0LlxcbkZhc3RFdGhlcm5ldDAvMTIgaXMgYWRtaW5pc3RyYXRpdmVseSBkb3duLlxcblBhY2tldHM6IFNlbnQgPSA0LCBSZWNlaXZlZCA9IDAsIExvc3QgPSA0ICgxMDAlIGxvc3MpLmA7XG4gICAgICAgIGlzRXJyb3IgPSB0cnVlO1xuICAgICAgfSBlbHNlIHtcbiAgICAgICAgb3V0cHV0ID0gYFBpbmdpbmcgJHt0YXJnZXR9IHdpdGggMzIgYnl0ZXMgb2YgZGF0YTpcXG5SZXBseSBmcm9tICR7dGFyZ2V0fTogYnl0ZXM9MzIgdGltZT0ybXMgVFRMPTY0XFxuUmVwbHkgZnJvbSAke3RhcmdldH06IGJ5dGVzPTMyIHRpbWU9MW1zIFRUTD02NFxcblN1Y2Nlc3MgcmF0ZSBpcyAxMDAgcGVyY2VudCAoNC80KS5gO1xuICAgICAgfVxuICAgIH0gZWxzZSBpZiAodHJpbW1lZC5pbmNsdWRlcygnc2hvdyBpcCBpbnQnKSB8fCB0cmltbWVkLmluY2x1ZGVzKCdzaG93IGlwIGludGVyZmFjZScpKSB7XG4gICAgICBvdXRwdXQgPSBgSW50ZXJmYWNlICAgICAgICAgICAgICBJUC1BZGRyZXNzICAgICAgT0s/IE1ldGhvZCBTdGF0dXMgICAgICAgICAgICAgICAgUHJvdG9jb2xcXG5GYXN0RXRoZXJuZXQwLzEgICAgICAgIHVuYXNzaWduZWQgICAgICBZRVMgdW5zZXQgICR7bWlzc2lvbi5pZCA9PT0gMSA/ICdkb3duICAgICAgICAgICAgICAgICAgZG93bicgOiAndXAgICAgICAgICAgICAgICAgICAgIHVwJ31cXG5GYXN0RXRoZXJuZXQwLzIgICAgICAgIHVuYXNzaWduZWQgICAgICBZRVMgdW5zZXQgIHVwICAgICAgICAgICAgICAgICAgICB1cFxcbkZhc3RFdGhlcm5ldDAvMTIgICAgICAgdW5hc3NpZ25lZCAgICAgIFlFUyB1bnNldCAgJHttaXNzaW9uLmlkID09PSA1ID8gJ2FkbWluaXN0cmF0aXZlbHkgZG93biBkb3duJyA6ICd1cCAgICAgICAgICAgICAgICAgICAgdXAnfVxcbkdpZ2FiaXRFdGhlcm5ldDAvMSAgICAgMTkyLjE2OC4xMC4xICAgIFlFUyBtYW51YWwgdXAgICAgICAgICAgICAgICAgICAgIHVwXFxuR2lnYWJpdEV0aGVybmV0MC8yICAgICAxMC4wLjAuMSAgICAgICAgWUVTIG1hbnVhbCB1cCAgICAgICAgICAgICAgICAgICAgdXBgO1xuICAgIH0gZWxzZSBpZiAodHJpbW1lZC5pbmNsdWRlcygnaXBjb25maWcnKSkge1xuICAgICAgb3V0cHV0ID0gYFdpbmRvd3MgSVAgQ29uZmlndXJhdGlvblxcblxcbkV0aGVybmV0IGFkYXB0ZXIgTG9jYWwgQXJlYSBDb25uZWN0aW9uOlxcbiAgIENvbm5lY3Rpb24tc3BlY2lmaWMgRE5TIFN1ZmZpeCAgLiA6IGNvcnAubG9jYWxcXG4gICBJUHY0IEFkZHJlc3MuIC4gLiAuIC4gLiAuIC4gLiAuIC4gOiAke21pc3Npb24uaWQgPT09IDIgPyAnMTkyLjE2OC4xLjU1IChXcm9uZyBTdWJuZXQhKScgOiAnMTkyLjE2OC4xMC4xMid9XFxuICAgU3VibmV0IE1hc2sgLiAuIC4gLiAuIC4gLiAuIC4gLiAuIDogJHttaXNzaW9uLmlkID09PSAzID8gJzI1NS4yNTUuMjU1LjE5MiAoLzI2IElzb2xhdGVkISknIDogJzI1NS4yNTUuMjU1LjAnfVxcbiAgIERlZmF1bHQgR2F0ZXdheSAuIC4gLiAuIC4gLiAuIC4gLiA6ICR7bWlzc2lvbi5pZCA9PT0gNCA/ICcxOTIuMTY4LjEuMSAoTUlTQ09ORklHVVJFRCknIDogJzE5Mi4xNjguMTAuMSd9XFxuICAgRE5TIFNlcnZlcnMgLiAuIC4gLiAuIC4gLiAuIC4gLiAuIDogJHttaXNzaW9uLmlkID09PSAxMSA/ICc4LjguOC44IChQdWJsaWMgcmVzb2x2ZXIpJyA6ICcxOTIuMTY4LjEwLjUzJ31gO1xuICAgIH0gZWxzZSBpZiAodHJpbW1lZC5pbmNsdWRlcygnc2hvdyB2bGFuJykpIHtcbiAgICAgIG91dHB1dCA9IGBWTEFOIE5hbWUgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFN0YXR1cyAgICBQb3J0c1xcbi0tLS0gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gLS0tLS0tLS0tIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cXG4xICAgIGRlZmF1bHQgICAgICAgICAgICAgICAgICAgICAgICAgIGFjdGl2ZSAgICAke21pc3Npb24uaWQgPT09IDYgPyAnRmEwLzEsIEZhMC8yLCBGYTAvOCAoTUlTTUFQUEVEKScgOiAnRmEwLzEsIEZhMC8yJ31cXG4xMCAgIEFjY291bnRpbmcgICAgICAgICAgICAgICAgICAgICAgIGFjdGl2ZSAgICBGYTAvMywgRmEwLzRcXG4yMCAgIE1hcmtldGluZyAgICAgICAgICAgICAgICAgICAgICAgIGFjdGl2ZSAgICBGYTAvNSwgRmEwLzZcXG4zMCAgIEVuZ2luZWVyaW5nICAgICAgICAgICAgICAgICAgICAgIGFjdGl2ZSAgICAke21pc3Npb24uaWQgPT09IDYgPyAnRmEwLzE4IChNaXNzaW5nIEZhMC84ISknIDogJ0ZhMC84LCBGYTAvMTgnfWA7XG4gICAgfSBlbHNlIGlmICh0cmltbWVkLmluY2x1ZGVzKCdzaG93IGludGVyZmFjZXMgdHJ1bmsnKSkge1xuICAgICAgb3V0cHV0ID0gYFBvcnQgICAgICAgIE1vZGUgICAgICAgICBFbmNhcHN1bGF0aW9uICBTdGF0dXMgICAgICAgIE5hdGl2ZSB2bGFuXFxuR2kwLzEgICAgICAgb24gICAgICAgICAgIDgwMi4xcSAgICAgICAgIHRydW5raW5nICAgICAgJHttaXNzaW9uLmlkID09PSAxMiA/ICc5OSAoTUlTTUFUQ0ghKScgOiAnMSd9XFxuXFxuUG9ydCAgICAgICAgVmxhbnMgYWxsb3dlZCBvbiB0cnVua1xcbkdpMC8xICAgICAgICR7bWlzc2lvbi5pZCA9PT0gNyA/ICcxMCwyMCAoVkxBTiA0MCBEUk9QUEVEISknIDogJzEtNDA5NCd9YDtcbiAgICB9IGVsc2UgaWYgKHRyaW1tZWQuaW5jbHVkZXMoJ3Nob3cgaXAgcm91dGUnKSkge1xuICAgICAgb3V0cHV0ID0gYENvZGVzOiBMIC0gbG9jYWwsIEMgLSBjb25uZWN0ZWQsIFMgLSBzdGF0aWMsIFIgLSBSSVAsIE8gLSBPU1BGXFxuXFxuR2F0ZXdheSBvZiBsYXN0IHJlc29ydCBpcyBub3Qgc2V0XFxuXFxuICAgICAgMTAuMC4wLjAvOCBpcyB2YXJpYWJseSBzdWJuZXR0ZWQsIDIgc3VibmV0cywgMiBtYXNrc1xcbkMgICAgICAgIDEwLjI1NC4xLjAvMzAgaXMgZGlyZWN0bHkgY29ubmVjdGVkLCBTZXJpYWwwLzAvMFxcbiAgICAgIDE5Mi4xNjguODguMC8yNCBpcyBzdWJuZXR0ZWQsIDEgc3VibmV0c1xcbkMgICAgICAgIDE5Mi4xNjguODguMCBpcyBkaXJlY3RseSBjb25uZWN0ZWQsIEdpZ2FiaXRFdGhlcm5ldDAvMFxcbiR7bWlzc2lvbi5pZCA9PT0gOCA/ICclIE5ldHdvcmsgMTcyLjE2LjAuMC8xNiBpcyBub3QgaW4gdGFibGUgKE1pc3NpbmcgU3RhdGljIFJvdXRlISknIDogJ1MgICAgICAgIDE3Mi4xNi4wLjAvMTYgWzEvMF0gdmlhIDEwLjI1NC4xLjEnfWA7XG4gICAgfSBlbHNlIGlmICh0cmltbWVkLmluY2x1ZGVzKCdzaG93IGlwIG9zcGYgbmVpZ2hib3InKSkge1xuICAgICAgb3V0cHV0ID0gbWlzc2lvbi5pZCA9PT0gOSBcbiAgICAgICAgPyBgJSBPU1BGOiBOZWlnaGJvciBhZGphY2VuY3kgZmFpbGVkIG9uIEdpZ2FiaXRFdGhlcm5ldDAvMC8xXFxuUmVhc29uOiBNaXNtYXRjaGVkIEFyZWEgSUQgKExvY2FsIEFyZWEgMCB2cyBSZW1vdGUgQXJlYSAxKWBcbiAgICAgICAgOiBgTmVpZ2hib3IgSUQgICAgIFByaSAgIFN0YXRlICAgICAgICAgICBEZWFkIFRpbWUgICBBZGRyZXNzICAgICAgICAgSW50ZXJmYWNlXFxuMTAuMC4xMi4yICAgICAgICAgMSAgIEZVTEwvQkRSICAgICAgICAwMDowMDozMyAgICAxMC4wLjEyLjIgICAgICAgR2lnYWJpdEV0aGVybmV0MC8wLzFgO1xuICAgIH0gZWxzZSB7XG4gICAgICBvdXRwdXQgPSBsYW5ndWFnZSA9PT0gJ3RoJyA/IGAlIOC5hOC4oeC5iOC4o+C4ueC5ieC4iOC4seC4geC4hOC4s+C4quC4seC5iOC4hyBcIiR7dHJpbW1lZH1cIiDguJ7guLTguKHguJ7guYwgXCJoZWxwXCIg4LmA4Lie4Li34LmI4Lit4LiU4Li54LiE4Liz4Liq4Lix4LmI4LiH4LiX4Li14LmI4Lij4Lit4LiH4Lij4Lix4LiaYCA6IGAlIFVua25vd24gZGlhZ25vc3RpYyBjb21tYW5kIFwiJHt0cmltbWVkfVwiLiBUeXBlIFwiaGVscFwiIGZvciBhIGxpc3Qgb2YgYXZhaWxhYmxlIHZlcmlmaWNhdGlvbiBjb21tYW5kcy5gO1xuICAgICAgaXNFcnJvciA9IHRydWU7XG4gICAgfVxuXG4gICAgc2V0TG9ncyhwcmV2ID0+IFsuLi5wcmV2LCB7XG4gICAgICBpZDogTWF0aC5yYW5kb20oKS50b1N0cmluZygpLFxuICAgICAgY29tbWFuZDogY21kU3RyLFxuICAgICAgb3V0cHV0LFxuICAgICAgaXNFcnJvclxuICAgIH1dKTtcbiAgICBzZXRJbnB1dCgnJyk7XG4gIH07XG5cbiAgY29uc3QgaGFuZGxlS2V5RG93biA9IChlOiBSZWFjdC5LZXlib2FyZEV2ZW50PEhUTUxJbnB1dEVsZW1lbnQ+KSA9PiB7XG4gICAgaWYgKGUua2V5ID09PSAnRW50ZXInKSB7XG4gICAgICBoYW5kbGVDb21tYW5kKGlucHV0KTtcbiAgICB9XG4gIH07XG5cbiAgY29uc3QgcXVpY2tDaGlwcyA9IFtcbiAgICAnaXBjb25maWcgL2FsbCcsXG4gICAgJ3BpbmcgMTkyLjE2OC4xMC4xJyxcbiAgICAnc2hvdyBpcCBpbnRlcmZhY2UgYnJpZWYnLFxuICAgICdzaG93IHZsYW4gYnJpZWYnLFxuICAgICdzaG93IGludGVyZmFjZXMgdHJ1bmsnLFxuICAgICdzaG93IGlwIHJvdXRlJ1xuICBdO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBpZD1cImNpc2NvLXNpbXVsYXRlZC1jbGlcIiBjbGFzc05hbWU9XCJiZy1bIzBCMEYxNF0gYm9yZGVyIGJvcmRlci1bIzI2MzI0MV0gcm91bmRlZC1sZyBvdmVyZmxvdy1oaWRkZW4gZm9udC1tb25vIHRleHQteHMgc2hhZG93LXhsXCI+XG4gICAgICB7LyogVGVybWluYWwgVGl0bGUgQmFyICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJiZy1bIzExMTgyMF0gYm9yZGVyLWIgYm9yZGVyLVsjMjYzMjQxXSBweC0zIHNtOnB4LTQgcHktMi41IGZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtMlwiPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggbWluLXctMCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZ2FwLTEuNVwiPlxuICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidy0yLjUgaC0yLjUgcm91bmRlZC1mdWxsIGJnLVsjRkY1MjUyXVwiPjwvc3Bhbj5cbiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInctMi41IGgtMi41IHJvdW5kZWQtZnVsbCBiZy1bI0Y1QzU0Ml1cIj48L3NwYW4+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ3LTIuNSBoLTIuNSByb3VuZGVkLWZ1bGwgYmctWyMyRUNDNzFdXCI+PC9zcGFuPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cIm1sLTEgZmxleCBtaW4tdy0wIGl0ZW1zLWNlbnRlciBnYXAtMS41IHRydW5jYXRlIHRleHQtWzEwcHhdIGZvbnQtYm9sZCB0ZXh0LVsjOEQ5QkE4XSBzbTptbC0yIHNtOnRleHQtWzExcHhdXCI+XG4gICAgICAgICAgICA8VGVybWluYWxJY29uIGNsYXNzTmFtZT1cInctMy41IGgtMy41IHRleHQtWyNGNUM1NDJdXCIgLz5cbiAgICAgICAgICAgIENpc2NvIElPUyB7bGFuZ3VhZ2UgPT09ICd0aCcgPyAn4Lir4LiZ4LmJ4Liy4LiV4LmI4Liy4LiH4LiV4Lij4Lin4LiI4Liq4Lit4LiaJyA6ICdEaWFnbm9zdGljIFRlcm1pbmFsJ30g4oCUIHttaXNzaW9uLmluY2lkZW50X2lkfVxuICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxidXR0b25cbiAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBzZXRMb2dzKFtdKX1cbiAgICAgICAgICB0aXRsZT17bGFuZ3VhZ2UgPT09ICd0aCcgPyAn4Lil4LmJ4Liy4LiH4Lir4LiZ4LmJ4Liy4LiI4LitJyA6ICdDbGVhciBzY3JlZW4nfVxuICAgICAgICAgIGNsYXNzTmFtZT1cInRleHQtWyM4RDlCQThdIGhvdmVyOnRleHQtWyNGNEY2RjhdIHAtMSByb3VuZGVkIGhvdmVyOmJnLVsjMTYxRjI5XVwiXG4gICAgICAgID5cbiAgICAgICAgICA8VHJhc2gyIGNsYXNzTmFtZT1cInctMy41IGgtMy41XCIgLz5cbiAgICAgICAgPC9idXR0b24+XG4gICAgICA8L2Rpdj5cblxuICAgICAgey8qIFRlcm1pbmFsIE91dHB1dCBBcmVhICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJwLTQgaC02NCBvdmVyZmxvdy15LWF1dG8gc3BhY2UteS0zIGJnLVsjMEIwRjE0XVwiPlxuICAgICAgICB7bG9ncy5tYXAoKGxvZykgPT4gKFxuICAgICAgICAgIDxkaXYga2V5PXtsb2cuaWR9IGNsYXNzTmFtZT1cInNwYWNlLXktMVwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMS41IHRleHQtWyMwMEMyRkZdXCI+XG4gICAgICAgICAgICAgIDxzcGFuPlN3aXRjaCM8L3NwYW4+XG4gICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtWyNGNEY2RjhdXCI+e2xvZy5jb21tYW5kfTwvc3Bhbj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPHByZSBjbGFzc05hbWU9e2B3aGl0ZXNwYWNlLXByZS13cmFwIGxlYWRpbmctcmVsYXhlZCAke1xuICAgICAgICAgICAgICBsb2cuaXNFcnJvciA/ICd0ZXh0LVsjRkY1MjUyXScgOiAndGV4dC1bIzhEOUJBOF0nXG4gICAgICAgICAgICB9YH0+XG4gICAgICAgICAgICAgIHtsb2cub3V0cHV0fVxuICAgICAgICAgICAgPC9wcmU+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICkpfVxuICAgICAgICA8ZGl2IHJlZj17ZW5kUmVmfSAvPlxuICAgICAgPC9kaXY+XG5cbiAgICAgIHsvKiBRdWljayBEaWFnbm9zdGljIENvbW1hbmQgQ2hpcHMgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cInB4LTMgcHktMiBiZy1bIzExMTgyMF0vOTAgYm9yZGVyLXQgYm9yZGVyLVsjMjYzMjQxXSBmbGV4IGZsZXgtd3JhcCBnYXAtMS41IGl0ZW1zLWNlbnRlclwiPlxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LVsxMHB4XSB0ZXh0LVsjOEQ5QkE4XSB1cHBlcmNhc2UgbXItMVwiPntsYW5ndWFnZSA9PT0gJ3RoJyA/ICfguITguLPguKrguLHguYjguIfguJTguYjguKfguJk6JyA6ICdRdWljayBJbnNwZWN0Oid9PC9zcGFuPlxuICAgICAgICB7cXVpY2tDaGlwcy5tYXAoKGNoaXApID0+IChcbiAgICAgICAgICA8YnV0dG9uXG4gICAgICAgICAgICBrZXk9e2NoaXB9XG4gICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBoYW5kbGVDb21tYW5kKGNoaXApfVxuICAgICAgICAgICAgY2xhc3NOYW1lPVwidGV4dC1bMTBweF0gcHgtMiBweS0wLjUgcm91bmRlZCBiZy1bIzE2MUYyOV0gaG92ZXI6YmctWyMyNjMyNDFdIHRleHQtWyMwMEMyRkZdIGJvcmRlciBib3JkZXItWyMyNjMyNDFdIHRyYW5zaXRpb24tY29sb3JzXCJcbiAgICAgICAgICA+XG4gICAgICAgICAgICB7Y2hpcH1cbiAgICAgICAgICA8L2J1dHRvbj5cbiAgICAgICAgKSl9XG4gICAgICA8L2Rpdj5cblxuICAgICAgey8qIENvbW1hbmQgSW5wdXQgUHJvbXB0ICovfVxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJwLTIuNSBiZy1bIzExMTgyMF0gYm9yZGVyLXQgYm9yZGVyLVsjMjYzMjQxXSBmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LVsjMDBDMkZGXSBmb250LWJvbGRcIj5Td2l0Y2gjPC9zcGFuPlxuICAgICAgICA8aW5wdXRcbiAgICAgICAgICBpZD1cInRlcm1pbmFsLWNsaS1pbnB1dFwiXG4gICAgICAgICAgdHlwZT1cInRleHRcIlxuICAgICAgICAgIHZhbHVlPXtpbnB1dH1cbiAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IHNldElucHV0KGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICBvbktleURvd249e2hhbmRsZUtleURvd259XG4gICAgICAgICAgcGxhY2Vob2xkZXI9e2xhbmd1YWdlID09PSAndGgnID8gJ+C4nuC4tOC4oeC4nuC5jOC4hOC4s+C4quC4seC5iOC4hyDguYDguIrguYjguJkgXCJwaW5nIDE5Mi4xNjguMTAuMVwiLCBcInNob3cgaXAgcm91dGVcIiwgXCJoZWxwXCIuLi4nIDogJ1R5cGUgY29tbWFuZCAoZS5nLiBcInBpbmcgMTkyLjE2OC4xMC4xXCIsIFwic2hvdyBpcCByb3V0ZVwiLCBcImhlbHBcIikuLi4nfVxuICAgICAgICAgIGNsYXNzTmFtZT1cImZsZXgtMSBiZy10cmFuc3BhcmVudCB0ZXh0LVsjRjRGNkY4XSBmb2N1czpvdXRsaW5lLW5vbmUgcGxhY2Vob2xkZXItWyM4RDlCQThdLzUwXCJcbiAgICAgICAgLz5cbiAgICAgICAgPGJ1dHRvblxuICAgICAgICAgIG9uQ2xpY2s9eygpID0+IGhhbmRsZUNvbW1hbmQoaW5wdXQpfVxuICAgICAgICAgIGNsYXNzTmFtZT1cInAtMSBweC0yIHJvdW5kZWQgYmctWyNGNUM1NDJdLzEwIHRleHQtWyNGNUM1NDJdIGhvdmVyOmJnLVsjRjVDNTQyXS8yMCBib3JkZXIgYm9yZGVyLVsjRjVDNTQyXS80MCB0cmFuc2l0aW9uLWNvbG9ycyBmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMSB0ZXh0LVsxMXB4XVwiXG4gICAgICAgID5cbiAgICAgICAgICA8c3Bhbj57bGFuZ3VhZ2UgPT09ICd0aCcgPyAn4LmA4Lij4Li14Lii4LiB4LmD4LiK4LmJJyA6ICdSdW4nfTwvc3Bhbj5cbiAgICAgICAgICA8Q29ybmVyRG93bkxlZnQgY2xhc3NOYW1lPVwidy0zIGgtM1wiIC8+XG4gICAgICAgIDwvYnV0dG9uPlxuICAgICAgPC9kaXY+XG4gICAgPC9kaXY+XG4gICk7XG59O1xuIl0sImZpbGUiOiJDOi9Vc2Vycy9NT05LQ1NLL0Rlc2t0b3AvQ1RGL25ldHdvcmstZW5naW5lZXItY2FwdHVyZS10aGUtZmxhZy9zcmMvY29tcG9uZW50cy9taXNzaW9uL0Npc2NvVGVybWluYWwudHN4In0=

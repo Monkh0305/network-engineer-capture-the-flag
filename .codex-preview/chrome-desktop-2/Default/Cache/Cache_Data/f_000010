@@ -1,0 +1,203 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/AchievementsPage.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8efb80f6"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport1_react from "/node_modules/.vite/deps/react.js?v=8efb80f6"; const useEffect = __vite__cjsImport1_react["useEffect"]; const useState = __vite__cjsImport1_react["useState"];
+import { Award, CheckCircle2, Lock, Trophy } from "/node_modules/.vite/deps/lucide-react.js?v=8efb80f6";
+import { api } from "/src/services/api.ts";
+import { useLanguage } from "/src/context/LanguageContext.tsx";
+import { localizeAchievement } from "/src/context/contentLocalization.ts";
+export const AchievementsPage = () => {
+  _s();
+  const { language, t } = useLanguage();
+  const [achievements, setAchievements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    loadAchievements();
+  }, []);
+  const loadAchievements = async () => {
+    try {
+      setLoading(true);
+      const res = await api.getAchievements();
+      setAchievements(res.achievements);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const unlockedCount = achievements.filter((a) => a.is_unlocked === 1).length;
+  return /* @__PURE__ */ jsxDEV("div", { className: "dashboard-page-theme mx-auto max-w-7xl space-y-6 animate-in fade-in duration-300", children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "dashboard-content-card relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:flex-row md:items-center sm:p-6", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-amber-100/80 blur-3xl" }, void 0, false, {
+        fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+        lineNumber: 35,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { children: [
+        /* @__PURE__ */ jsxDEV("h1", { className: "text-2xl font-black text-[#F4F6F8] tracking-tight", children: t("ach.title") }, void 0, false, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+          lineNumber: 37,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-[#8D9BA8] mt-1 font-mono", children: t("ach.subtitle") }, void 0, false, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+          lineNumber: 40,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+        lineNumber: 36,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "relative z-10 flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#F5C542]/10 border border-[#F5C542]/40 text-xs font-mono text-[#F5C542] font-bold", children: [
+        /* @__PURE__ */ jsxDEV(Trophy, { className: "w-4 h-4" }, void 0, false, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+          lineNumber: 46,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { children: language === "th" ? `ปลดล็อกแล้ว ${unlockedCount} จาก ${achievements.length} เหรียญ` : `${unlockedCount} of ${achievements.length} Badges Unlocked` }, void 0, false, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+          lineNumber: 47,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+        lineNumber: 45,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+      lineNumber: 34,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4", children: achievements.map((sourceAchievement) => {
+      const ach = localizeAchievement(sourceAchievement, language);
+      const isUnlocked = ach.is_unlocked === 1;
+      return /* @__PURE__ */ jsxDEV(
+        "div",
+        {
+          className: `dashboard-content-card p-5 rounded-xl border flex flex-col justify-between space-y-4 transition-all hover:-translate-y-1 ${isUnlocked ? "bg-[#111820] border-[#F5C542]/50 shadow-[0_0_20px_rgba(245,197,66,0.1)]" : "bg-[#0B0F14]/50 border-[#263241]/60 opacity-60"}`,
+          children: [
+            /* @__PURE__ */ jsxDEV("div", { className: "flex items-start gap-3.5", children: [
+              /* @__PURE__ */ jsxDEV("div", { className: `w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 border ${isUnlocked ? "bg-[#F5C542]/10 border-[#F5C542]/40 text-[#F5C542]" : "bg-[#161F29] border-[#263241] text-[#8D9BA8]"}`, children: /* @__PURE__ */ jsxDEV(Award, { className: "w-6 h-6" }, void 0, false, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                lineNumber: 72,
+                columnNumber: 19
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                lineNumber: 67,
+                columnNumber: 17
+              }, this),
+              /* @__PURE__ */ jsxDEV("div", { className: "space-y-1", children: [
+                /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-between", children: /* @__PURE__ */ jsxDEV("h3", { className: `text-xs font-bold ${isUnlocked ? "text-[#F4F6F8]" : "text-[#8D9BA8]"}`, children: ach.name }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                  lineNumber: 77,
+                  columnNumber: 21
+                }, this) }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                  lineNumber: 76,
+                  columnNumber: 19
+                }, this),
+                /* @__PURE__ */ jsxDEV("p", { className: "text-[11px] text-[#8D9BA8] leading-relaxed", children: ach.description }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                  lineNumber: 81,
+                  columnNumber: 19
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                lineNumber: 75,
+                columnNumber: 17
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+              lineNumber: 66,
+              columnNumber: 15
+            }, this),
+            /* @__PURE__ */ jsxDEV("div", { className: "pt-2 border-t border-[#263241]/70 flex items-center justify-between text-[11px] font-mono", children: [
+              isUnlocked ? /* @__PURE__ */ jsxDEV("span", { className: "flex items-center gap-1 text-[#2ECC71] font-bold", children: [
+                /* @__PURE__ */ jsxDEV(CheckCircle2, { className: "w-3.5 h-3.5" }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                  lineNumber: 90,
+                  columnNumber: 21
+                }, this),
+                " ",
+                language === "th" ? "ปลดล็อกแล้ว" : "UNLOCKED"
+              ] }, void 0, true, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                lineNumber: 89,
+                columnNumber: 17
+              }, this) : /* @__PURE__ */ jsxDEV("span", { className: "flex items-center gap-1 text-[#8D9BA8]", children: [
+                /* @__PURE__ */ jsxDEV(Lock, { className: "w-3 h-3" }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                  lineNumber: 94,
+                  columnNumber: 21
+                }, this),
+                " ",
+                language === "th" ? "ยังไม่ปลดล็อก" : "LOCKED"
+              ] }, void 0, true, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                lineNumber: 93,
+                columnNumber: 17
+              }, this),
+              /* @__PURE__ */ jsxDEV("span", { className: "text-[#00C2FF] font-bold", children: ach.category }, void 0, false, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+                lineNumber: 98,
+                columnNumber: 17
+              }, this)
+            ] }, void 0, true, {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+              lineNumber: 87,
+              columnNumber: 15
+            }, this)
+          ]
+        },
+        ach.id,
+        true,
+        {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+          lineNumber: 58,
+          columnNumber: 13
+        },
+        this
+      );
+    }) }, void 0, false, {
+      fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+      lineNumber: 52,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx",
+    lineNumber: 32,
+    columnNumber: 5
+  }, this);
+};
+_s(AchievementsPage, "CncdrdxTuThN7hckEMVOHr0OknY=", false, function() {
+  return [useLanguage];
+});
+_c = AchievementsPage;
+var _c;
+$RefreshReg$(_c, "AchievementsPage");
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+function $RefreshReg$(type, id) {
+  return RefreshRuntime.register(type, "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/pages/AchievementsPage.tsx " + id);
+}
+function $RefreshSig$() {
+  return RefreshRuntime.createSignatureFunctionForTransform();
+}
+
+//# sourceMappingURL=data:application/json;base64,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aXJjbGUyIiwiTG9jayIsIlRyb3BoeSIsImFwaSIsInVzZUxhbmd1YWdlIiwibG9jYWxpemVBY2hpZXZlbWVudCIsIkFjaGlldmVtZW50c1BhZ2UiLCJfcyIsImxhbmd1YWdlIiwidCIsImFjaGlldmVtZW50cyIsInNldEFjaGlldmVtZW50cyIsImxvYWRpbmciLCJzZXRMb2FkaW5nIiwibG9hZEFjaGlldmVtZW50cyIsInJlcyIsImdldEFjaGlldmVtZW50cyIsImVyciIsImNvbnNvbGUiLCJlcnJvciIsInVubG9ja2VkQ291bnQiLCJmaWx0ZXIiLCJhIiwiaXNfdW5sb2NrZWQiLCJsZW5ndGgiLCJtYXAiLCJzb3VyY2VBY2hpZXZlbWVudCIsImFjaCIsImlzVW5sb2NrZWQiLCJuYW1lIiwiZGVzY3JpcHRpb24iLCJjYXRlZ29yeSIsImlkIiwiX2MiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiQWNoaWV2ZW1lbnRzUGFnZS50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IFJlYWN0LCB7IHVzZUVmZmVjdCwgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBBd2FyZCwgQ2hlY2tDaXJjbGUyLCBMb2NrLCBTcGFya2xlcywgU2hpZWxkLCBUcm9waHkgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgQWNoaWV2ZW1lbnQgfSBmcm9tICcuLi90eXBlcyc7XG5pbXBvcnQgeyBhcGkgfSBmcm9tICcuLi9zZXJ2aWNlcy9hcGknO1xuaW1wb3J0IHsgdXNlTGFuZ3VhZ2UgfSBmcm9tICcuLi9jb250ZXh0L0xhbmd1YWdlQ29udGV4dCc7XG5pbXBvcnQgeyBsb2NhbGl6ZUFjaGlldmVtZW50IH0gZnJvbSAnLi4vY29udGV4dC9jb250ZW50TG9jYWxpemF0aW9uJztcblxuZXhwb3J0IGNvbnN0IEFjaGlldmVtZW50c1BhZ2U6IFJlYWN0LkZDID0gKCkgPT4ge1xuICBjb25zdCB7IGxhbmd1YWdlLCB0IH0gPSB1c2VMYW5ndWFnZSgpO1xuICBjb25zdCBbYWNoaWV2ZW1lbnRzLCBzZXRBY2hpZXZlbWVudHNdID0gdXNlU3RhdGU8QWNoaWV2ZW1lbnRbXT4oW10pO1xuICBjb25zdCBbbG9hZGluZywgc2V0TG9hZGluZ10gPSB1c2VTdGF0ZSh0cnVlKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGxvYWRBY2hpZXZlbWVudHMoKTtcbiAgfSwgW10pO1xuXG4gIGNvbnN0IGxvYWRBY2hpZXZlbWVudHMgPSBhc3luYyAoKSA9PiB7XG4gICAgdHJ5IHtcbiAgICAgIHNldExvYWRpbmcodHJ1ZSk7XG4gICAgICBjb25zdCByZXMgPSBhd2FpdCBhcGkuZ2V0QWNoaWV2ZW1lbnRzKCk7XG4gICAgICBzZXRBY2hpZXZlbWVudHMocmVzLmFjaGlldmVtZW50cyk7XG4gICAgfSBjYXRjaCAoZXJyKSB7XG4gICAgICBjb25zb2xlLmVycm9yKGVycik7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldExvYWRpbmcoZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCB1bmxvY2tlZENvdW50ID0gYWNoaWV2ZW1lbnRzLmZpbHRlcihhID0+IGEuaXNfdW5sb2NrZWQgPT09IDEpLmxlbmd0aDtcblxuICByZXR1cm4gKFxuICAgIDxkaXYgY2xhc3NOYW1lPVwiZGFzaGJvYXJkLXBhZ2UtdGhlbWUgbXgtYXV0byBtYXgtdy03eGwgc3BhY2UteS02IGFuaW1hdGUtaW4gZmFkZS1pbiBkdXJhdGlvbi0zMDBcIj5cbiAgICAgIHsvKiBIZWFkZXIgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImRhc2hib2FyZC1jb250ZW50LWNhcmQgcmVsYXRpdmUgZmxleCBmbGV4LWNvbCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTQgb3ZlcmZsb3ctaGlkZGVuIHJvdW5kZWQtMnhsIGJvcmRlciBib3JkZXItc2xhdGUtMjAwIGJnLXdoaXRlIHAtNSBzaGFkb3ctc20gbWQ6ZmxleC1yb3cgbWQ6aXRlbXMtY2VudGVyIHNtOnAtNlwiPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInBvaW50ZXItZXZlbnRzLW5vbmUgYWJzb2x1dGUgLXJpZ2h0LTEwIC10b3AtMTYgaC00MCB3LTQwIHJvdW5kZWQtZnVsbCBiZy1hbWJlci0xMDAvODAgYmx1ci0zeGxcIiAvPlxuICAgICAgICA8ZGl2PlxuICAgICAgICAgIDxoMSBjbGFzc05hbWU9XCJ0ZXh0LTJ4bCBmb250LWJsYWNrIHRleHQtWyNGNEY2RjhdIHRyYWNraW5nLXRpZ2h0XCI+XG4gICAgICAgICAgICB7dCgnYWNoLnRpdGxlJyl9XG4gICAgICAgICAgPC9oMT5cbiAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtWyM4RDlCQThdIG10LTEgZm9udC1tb25vXCI+XG4gICAgICAgICAgICB7dCgnYWNoLnN1YnRpdGxlJyl9XG4gICAgICAgICAgPC9wPlxuICAgICAgICA8L2Rpdj5cblxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlbGF0aXZlIHotMTAgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgcHgtMy41IHB5LTEuNSByb3VuZGVkLXhsIGJnLVsjRjVDNTQyXS8xMCBib3JkZXIgYm9yZGVyLVsjRjVDNTQyXS80MCB0ZXh0LXhzIGZvbnQtbW9ubyB0ZXh0LVsjRjVDNTQyXSBmb250LWJvbGRcIj5cbiAgICAgICAgICA8VHJvcGh5IGNsYXNzTmFtZT1cInctNCBoLTRcIiAvPlxuICAgICAgICAgIDxzcGFuPntsYW5ndWFnZSA9PT0gJ3RoJyA/IGDguJvguKXguJTguKXguYfguK3guIHguYHguKXguYnguKcgJHt1bmxvY2tlZENvdW50fSDguIjguLLguIEgJHthY2hpZXZlbWVudHMubGVuZ3RofSDguYDguKvguKPguLXguKLguI1gIDogYCR7dW5sb2NrZWRDb3VudH0gb2YgJHthY2hpZXZlbWVudHMubGVuZ3RofSBCYWRnZXMgVW5sb2NrZWRgfTwvc3Bhbj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L2Rpdj5cblxuICAgICAgey8qIEdyaWQgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ3JpZC1jb2xzLTEgbWQ6Z3JpZC1jb2xzLTIgbGc6Z3JpZC1jb2xzLTMgZ2FwLTRcIj5cbiAgICAgICAge2FjaGlldmVtZW50cy5tYXAoKHNvdXJjZUFjaGlldmVtZW50KSA9PiB7XG4gICAgICAgICAgY29uc3QgYWNoID0gbG9jYWxpemVBY2hpZXZlbWVudChzb3VyY2VBY2hpZXZlbWVudCwgbGFuZ3VhZ2UpO1xuICAgICAgICAgIGNvbnN0IGlzVW5sb2NrZWQgPSBhY2guaXNfdW5sb2NrZWQgPT09IDE7XG5cbiAgICAgICAgICByZXR1cm4gKFxuICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICBrZXk9e2FjaC5pZH1cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgZGFzaGJvYXJkLWNvbnRlbnQtY2FyZCBwLTUgcm91bmRlZC14bCBib3JkZXIgZmxleCBmbGV4LWNvbCBqdXN0aWZ5LWJldHdlZW4gc3BhY2UteS00IHRyYW5zaXRpb24tYWxsIGhvdmVyOi10cmFuc2xhdGUteS0xICR7XG4gICAgICAgICAgICAgICAgaXNVbmxvY2tlZFxuICAgICAgICAgICAgICAgICAgPyAnYmctWyMxMTE4MjBdIGJvcmRlci1bI0Y1QzU0Ml0vNTAgc2hhZG93LVswXzBfMjBweF9yZ2JhKDI0NSwxOTcsNjYsMC4xKV0nXG4gICAgICAgICAgICAgICAgICA6ICdiZy1bIzBCMEYxNF0vNTAgYm9yZGVyLVsjMjYzMjQxXS82MCBvcGFjaXR5LTYwJ1xuICAgICAgICAgICAgICB9YH1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IGdhcC0zLjVcIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17YHctMTIgaC0xMiByb3VuZGVkLXhsIGZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHRleHQteGwgc2hyaW5rLTAgYm9yZGVyICR7XG4gICAgICAgICAgICAgICAgICBpc1VubG9ja2VkIFxuICAgICAgICAgICAgICAgICAgICA/ICdiZy1bI0Y1QzU0Ml0vMTAgYm9yZGVyLVsjRjVDNTQyXS80MCB0ZXh0LVsjRjVDNTQyXScgXG4gICAgICAgICAgICAgICAgICAgIDogJ2JnLVsjMTYxRjI5XSBib3JkZXItWyMyNjMyNDFdIHRleHQtWyM4RDlCQThdJ1xuICAgICAgICAgICAgICAgIH1gfT5cbiAgICAgICAgICAgICAgICAgIDxBd2FyZCBjbGFzc05hbWU9XCJ3LTYgaC02XCIgLz5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0xXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlblwiPlxuICAgICAgICAgICAgICAgICAgICA8aDMgY2xhc3NOYW1lPXtgdGV4dC14cyBmb250LWJvbGQgJHtpc1VubG9ja2VkID8gJ3RleHQtWyNGNEY2RjhdJyA6ICd0ZXh0LVsjOEQ5QkE4XSd9YH0+XG4gICAgICAgICAgICAgICAgICAgICAge2FjaC5uYW1lfVxuICAgICAgICAgICAgICAgICAgICA8L2gzPlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LVsxMXB4XSB0ZXh0LVsjOEQ5QkE4XSBsZWFkaW5nLXJlbGF4ZWRcIj5cbiAgICAgICAgICAgICAgICAgICAge2FjaC5kZXNjcmlwdGlvbn1cbiAgICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJwdC0yIGJvcmRlci10IGJvcmRlci1bIzI2MzI0MV0vNzAgZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIHRleHQtWzExcHhdIGZvbnQtbW9ub1wiPlxuICAgICAgICAgICAgICAgIHtpc1VubG9ja2VkID8gKFxuICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTEgdGV4dC1bIzJFQ0M3MV0gZm9udC1ib2xkXCI+XG4gICAgICAgICAgICAgICAgICAgIDxDaGVja0NpcmNsZTIgY2xhc3NOYW1lPVwidy0zLjUgaC0zLjVcIiAvPiB7bGFuZ3VhZ2UgPT09ICd0aCcgPyAn4Lib4Lil4LiU4Lil4LmH4Lit4LiB4LmB4Lil4LmJ4LinJyA6ICdVTkxPQ0tFRCd9XG4gICAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0xIHRleHQtWyM4RDlCQThdXCI+XG4gICAgICAgICAgICAgICAgICAgIDxMb2NrIGNsYXNzTmFtZT1cInctMyBoLTNcIiAvPiB7bGFuZ3VhZ2UgPT09ICd0aCcgPyAn4Lii4Lix4LiH4LmE4Lih4LmI4Lib4Lil4LiU4Lil4LmH4Lit4LiBJyA6ICdMT0NLRUQnfVxuICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICl9XG5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LVsjMDBDMkZGXSBmb250LWJvbGRcIj5cbiAgICAgICAgICAgICAgICAgIHthY2guY2F0ZWdvcnl9XG4gICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICk7XG4gICAgICAgIH0pfVxuICAgICAgPC9kaXY+XG4gICAgPC9kaXY+XG4gICk7XG59O1xuIl0sImZpbGUiOiJDOi9Vc2Vycy9NT05LQ1NLL0Rlc2t0b3AvQ1RGL25ldHdvcmstZW5naW5lZXItY2FwdHVyZS10aGUtZmxhZy9zcmMvcGFnZXMvQWNoaWV2ZW1lbnRzUGFnZS50c3gifQ==

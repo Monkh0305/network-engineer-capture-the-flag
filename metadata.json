@@ -1,0 +1,6 @@
+{
+  "name": "Network Engineer Capture The Flag",
+  "description": "Gamified learning platform for practicing Network Engineering and Network Troubleshooting through simulated missions, quizzes, and Cisco Packet Tracer labs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

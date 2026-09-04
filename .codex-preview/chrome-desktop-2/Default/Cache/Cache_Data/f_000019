@@ -1,0 +1,290 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/@fs/C:\\Users\\MONKCSK\\Desktop\\CTF\\network-engineer-capture-the-flag\\src\\components\\mission\\CtfQuestionCard.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=8efb80f6"; const Fragment = __vite__cjsImport0_react_jsxDevRuntime["Fragment"]; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport1_react from "/node_modules/.vite/deps/react.js?v=8efb80f6"; const useState = __vite__cjsImport1_react["useState"];
+import { CheckCircle2, XCircle, ArrowRight } from "/node_modules/.vite/deps/lucide-react.js?v=8efb80f6";
+import { useLanguage } from "/src/context/LanguageContext.tsx";
+export const CtfQuestionCard = ({
+  question,
+  index,
+  totalQuestions,
+  onSubmitAnswer
+}) => {
+  _s();
+  const { language, t } = useLanguage();
+  const [selectedOption, setSelectedOption] = useState(question.selected_answer || "");
+  const [submitting, setSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(
+    question.is_correct !== void 0 && question.is_correct !== null ? {
+      isCorrect: question.is_correct === 1,
+      rootCause: question.root_cause || null,
+      explanation: question.explanation || ""
+    } : null
+  );
+  const isAlreadyCorrect = feedback?.isCorrect === true || question.is_correct === 1;
+  const handleSubmit = async () => {
+    if (!selectedOption || submitting || isAlreadyCorrect) return;
+    try {
+      setSubmitting(true);
+      const res = await onSubmitAnswer(question.id, selectedOption);
+      setFeedback(res);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  const options = [
+    { key: "A", text: question.option_a },
+    { key: "B", text: question.option_b },
+    { key: "C", text: question.option_c },
+    { key: "D", text: question.option_d }
+  ];
+  return /* @__PURE__ */ jsxDEV(
+    "div",
+    {
+      id: `question-card-${question.id}`,
+      className: "bg-[#111820] border border-[#263241] rounded-xl p-4 sm:p-5 space-y-4 shadow-lg",
+      children: [
+        /* @__PURE__ */ jsxDEV("div", { className: "flex flex-wrap items-center justify-between gap-2 border-b border-[#263241] pb-3", children: [
+          /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-2", children: [
+            /* @__PURE__ */ jsxDEV("span", { className: "text-[11px] font-mono px-2 py-0.5 rounded bg-[#161F29] border border-[#263241] text-[#F5C542] font-bold", children: language === "th" ? `คำถามข้อ ${index + 1} จาก ${totalQuestions}` : `QUESTION ${index + 1} OF ${totalQuestions}` }, void 0, false, {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+              lineNumber: 71,
+              columnNumber: 11
+            }, this),
+            /* @__PURE__ */ jsxDEV("span", { className: "text-xs text-[#8D9BA8]", children: language === "th" ? "การตรวจสอบคำตอบ CTF" : "CTF Verification" }, void 0, false, {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+              lineNumber: 74,
+              columnNumber: 11
+            }, this)
+          ] }, void 0, true, {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+            lineNumber: 70,
+            columnNumber: 9
+          }, this),
+          isAlreadyCorrect && /* @__PURE__ */ jsxDEV("span", { className: "flex items-center gap-1 text-xs font-mono text-[#2ECC71] font-bold bg-[#2ECC71]/10 px-2 py-0.5 rounded border border-[#2ECC71]/30", children: [
+            /* @__PURE__ */ jsxDEV(CheckCircle2, { className: "w-3.5 h-3.5" }, void 0, false, {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+              lineNumber: 79,
+              columnNumber: 13
+            }, this),
+            " ",
+            language === "th" ? "ตอบถูกแล้ว" : "SOLVED"
+          ] }, void 0, true, {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+            lineNumber: 78,
+            columnNumber: 9
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+          lineNumber: 69,
+          columnNumber: 7
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "text-sm font-semibold text-[#F4F6F8] leading-relaxed", children: question.question }, void 0, false, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+          lineNumber: 85,
+          columnNumber: 7
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "space-y-2", children: options.map((opt) => {
+          const isSelected = selectedOption === opt.key;
+          const isOptCorrect = isAlreadyCorrect && question.correct_answer === opt.key;
+          return /* @__PURE__ */ jsxDEV(
+            "label",
+            {
+              onClick: () => {
+                if (!isAlreadyCorrect) {
+                  setSelectedOption(opt.key);
+                }
+              },
+              className: `flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${isSelected ? "bg-[#161F29] border-[#F5C542] shadow-[0_0_10px_rgba(245,197,66,0.15)] text-[#F4F6F8]" : "bg-[#0B0F14] border-[#263241] hover:border-[#8D9BA8]/60 text-[#8D9BA8]"} ${isAlreadyCorrect ? "cursor-default" : ""}`,
+              children: [
+                /* @__PURE__ */ jsxDEV(
+                  "div",
+                  {
+                    className: `w-6 h-6 rounded flex items-center justify-center font-mono text-xs font-bold shrink-0 transition-colors ${isSelected ? "bg-[#F5C542] text-[#0B0F14]" : "bg-[#161F29] text-[#8D9BA8] border border-[#263241]"}`,
+                    children: opt.key
+                  },
+                  void 0,
+                  false,
+                  {
+                    fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                    lineNumber: 109,
+                    columnNumber: 15
+                  },
+                  this
+                ),
+                /* @__PURE__ */ jsxDEV("span", { className: "text-xs leading-normal font-medium flex-1", children: opt.text }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                  lineNumber: 118,
+                  columnNumber: 15
+                }, this)
+              ]
+            },
+            opt.key,
+            true,
+            {
+              fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+              lineNumber: 96,
+              columnNumber: 13
+            },
+            this
+          );
+        }) }, void 0, false, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+          lineNumber: 90,
+          columnNumber: 7
+        }, this),
+        feedback && /* @__PURE__ */ jsxDEV(
+          "div",
+          {
+            id: `feedback-box-${question.id}`,
+            className: `p-4 rounded-lg border animate-in fade-in space-y-2 ${feedback.isCorrect ? "bg-[#2ECC71]/10 border-[#2ECC71]/40 text-[#F4F6F8]" : "bg-[#FF5252]/10 border-[#FF5252]/40 text-[#F4F6F8]"}`,
+            children: [
+              /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-2 font-bold text-xs", children: feedback.isCorrect ? /* @__PURE__ */ jsxDEV(Fragment, { children: [
+                /* @__PURE__ */ jsxDEV(CheckCircle2, { className: "w-4 h-4 text-[#2ECC71]" }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                  lineNumber: 139,
+                  columnNumber: 17
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { className: "text-[#2ECC71]", children: t("room.correct") }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                  lineNumber: 140,
+                  columnNumber: 17
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                lineNumber: 138,
+                columnNumber: 11
+              }, this) : /* @__PURE__ */ jsxDEV(Fragment, { children: [
+                /* @__PURE__ */ jsxDEV(XCircle, { className: "w-4 h-4 text-[#FF5252]" }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                  lineNumber: 144,
+                  columnNumber: 17
+                }, this),
+                /* @__PURE__ */ jsxDEV("span", { className: "text-[#FF5252]", children: t("room.incorrect") }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                  lineNumber: 145,
+                  columnNumber: 17
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                lineNumber: 143,
+                columnNumber: 11
+              }, this) }, void 0, false, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                lineNumber: 136,
+                columnNumber: 11
+              }, this),
+              feedback.isCorrect && feedback.rootCause && /* @__PURE__ */ jsxDEV("div", { className: "p-2.5 rounded bg-[#0B0F14]/70 border border-[#2ECC71]/30 text-xs", children: [
+                /* @__PURE__ */ jsxDEV("div", { className: "font-bold text-[#F5C542] uppercase text-[10px] font-mono tracking-wider", children: t("room.root_cause") }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                  lineNumber: 152,
+                  columnNumber: 15
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { className: "font-semibold text-[#F4F6F8] mt-0.5", children: feedback.rootCause }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                  lineNumber: 155,
+                  columnNumber: 15
+                }, this),
+                /* @__PURE__ */ jsxDEV("div", { className: "text-[#8D9BA8] text-[11px] mt-1 leading-relaxed", children: feedback.explanation }, void 0, false, {
+                  fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                  lineNumber: 158,
+                  columnNumber: 15
+                }, this)
+              ] }, void 0, true, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                lineNumber: 151,
+                columnNumber: 9
+              }, this),
+              !feedback.isCorrect && /* @__PURE__ */ jsxDEV("div", { className: "text-[11px] text-[#8D9BA8]", children: language === "th" ? "ตรวจสอบแผนผังเครือข่ายและผลลัพธ์จาก CLI อีกครั้ง หรือเปิดคำใบ้ในขั้นตอนที่ 4 เพื่อค้นหาจุดที่แพ็กเก็ตถูกทิ้ง" : "Re-examine the network topology and diagnostic CLI output, or unlock a hint in Task 4 to trace where the packet flow is dropped." }, void 0, false, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                lineNumber: 165,
+                columnNumber: 9
+              }, this)
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+            lineNumber: 128,
+            columnNumber: 7
+          },
+          this
+        ),
+        !isAlreadyCorrect && /* @__PURE__ */ jsxDEV("div", { className: "flex justify-end pt-2", children: /* @__PURE__ */ jsxDEV(
+          "button",
+          {
+            id: `submit-answer-btn-${question.id}`,
+            onClick: handleSubmit,
+            disabled: !selectedOption || submitting,
+            className: `flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold transition-all sm:w-auto ${!selectedOption || submitting ? "bg-[#263241] text-[#8D9BA8] cursor-not-allowed" : "bg-[#F5C542] text-[#0B0F14] hover:bg-[#F5C542]/90 shadow-[0_0_15px_rgba(245,197,66,0.3)]"}`,
+            children: [
+              /* @__PURE__ */ jsxDEV("span", { children: submitting ? language === "th" ? "กำลังตรวจสอบ..." : "Verifying..." : t("room.submit_answer") }, void 0, false, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                lineNumber: 185,
+                columnNumber: 13
+              }, this),
+              /* @__PURE__ */ jsxDEV(ArrowRight, { className: "w-3.5 h-3.5" }, void 0, false, {
+                fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+                lineNumber: 186,
+                columnNumber: 13
+              }, this)
+            ]
+          },
+          void 0,
+          true,
+          {
+            fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+            lineNumber: 175,
+            columnNumber: 11
+          },
+          this
+        ) }, void 0, false, {
+          fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+          lineNumber: 174,
+          columnNumber: 7
+        }, this)
+      ]
+    },
+    void 0,
+    true,
+    {
+      fileName: "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx",
+      lineNumber: 64,
+      columnNumber: 5
+    },
+    this
+  );
+};
+_s(CtfQuestionCard, "6iapFdcGITZPfZj2GoDxEyD5I6s=", false, function() {
+  return [useLanguage];
+});
+_c = CtfQuestionCard;
+var _c;
+$RefreshReg$(_c, "CtfQuestionCard");
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+function $RefreshReg$(type, id) {
+  return RefreshRuntime.register(type, "C:/Users/MONKCSK/Desktop/CTF/network-engineer-capture-the-flag/src/components/mission/CtfQuestionCard.tsx " + id);
+}
+function $RefreshSig$() {
+  return RefreshRuntime.createSignatureFunctionForTransform();
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6IkFBc0VVLFNBbUVJLFVBbkVKOztBQXRFVixTQUFnQkEsZ0JBQWdCO0FBRWhDLFNBQVNDLGNBQWNDLFNBQXFCQyxrQkFBK0I7QUFDM0UsU0FBU0MsbUJBQW1CO0FBYXJCLGFBQU1DLGtCQUFrREEsQ0FBQztBQUFBLEVBQzlEQztBQUFBQSxFQUNBQztBQUFBQSxFQUNBQztBQUFBQSxFQUNBQztBQUNGLE1BQU07QUFBQUMsS0FBQTtBQUNKLFFBQU0sRUFBRUMsVUFBVUMsRUFBRSxJQUFJUixZQUFZO0FBQ3BDLFFBQU0sQ0FBQ1MsZ0JBQWdCQyxpQkFBaUIsSUFBSWQsU0FBaUJNLFNBQVNTLG1CQUFtQixFQUFFO0FBQzNGLFFBQU0sQ0FBQ0MsWUFBWUMsYUFBYSxJQUFJakIsU0FBUyxLQUFLO0FBQ2xELFFBQU0sQ0FBQ2tCLFVBQVVDLFdBQVcsSUFBSW5CO0FBQUFBLElBSzlCTSxTQUFTYyxlQUFlQyxVQUFhZixTQUFTYyxlQUFlLE9BQ3pEO0FBQUEsTUFDRUUsV0FBV2hCLFNBQVNjLGVBQWU7QUFBQSxNQUNuQ0csV0FBV2pCLFNBQVNrQixjQUFjO0FBQUEsTUFDbENDLGFBQWFuQixTQUFTbUIsZUFBZTtBQUFBLElBQ3ZDLElBQ0E7QUFBQSxFQUNOO0FBRUEsUUFBTUMsbUJBQW1CUixVQUFVSSxjQUFjLFFBQVFoQixTQUFTYyxlQUFlO0FBRWpGLFFBQU1PLGVBQWUsWUFBWTtBQUMvQixRQUFJLENBQUNkLGtCQUFrQkcsY0FBY1UsaUJBQWtCO0FBRXZELFFBQUk7QUFDRlQsb0JBQWMsSUFBSTtBQUNsQixZQUFNVyxNQUFNLE1BQU1uQixlQUFlSCxTQUFTdUIsSUFBSWhCLGNBQWM7QUFDNURNLGtCQUFZUyxHQUFHO0FBQUEsSUFDakIsU0FBU0UsS0FBSztBQUNaQyxjQUFRQyxNQUFNRixHQUFHO0FBQUEsSUFDbkIsVUFBQztBQUNDYixvQkFBYyxLQUFLO0FBQUEsSUFDckI7QUFBQSxFQUNGO0FBRUEsUUFBTWdCLFVBQVU7QUFBQSxJQUNkLEVBQUVDLEtBQUssS0FBS0MsTUFBTTdCLFNBQVM4QixTQUFTO0FBQUEsSUFDcEMsRUFBRUYsS0FBSyxLQUFLQyxNQUFNN0IsU0FBUytCLFNBQVM7QUFBQSxJQUNwQyxFQUFFSCxLQUFLLEtBQUtDLE1BQU03QixTQUFTZ0MsU0FBUztBQUFBLElBQ3BDLEVBQUVKLEtBQUssS0FBS0MsTUFBTTdCLFNBQVNpQyxTQUFTO0FBQUEsRUFBQztBQUd2QyxTQUNFO0FBQUEsSUFBQztBQUFBO0FBQUEsTUFDQyxJQUFJLGlCQUFpQmpDLFNBQVN1QixFQUFFO0FBQUEsTUFDaEMsV0FBVTtBQUFBLE1BR1Y7QUFBQSwrQkFBQyxTQUFJLFdBQVUsb0ZBQ2I7QUFBQSxpQ0FBQyxTQUFJLFdBQVUsMkJBQ2I7QUFBQSxtQ0FBQyxVQUFLLFdBQVUsMkdBQ2JsQix1QkFBYSxPQUFPLFlBQVlKLFFBQVEsQ0FBQyxRQUFRQyxjQUFjLEtBQUssWUFBWUQsUUFBUSxDQUFDLE9BQU9DLGNBQWMsTUFEakg7QUFBQTtBQUFBO0FBQUE7QUFBQSxtQkFFQTtBQUFBLFlBQ0EsdUJBQUMsVUFBSyxXQUFVLDBCQUEwQkcsdUJBQWEsT0FBTyx3QkFBd0Isc0JBQXRGO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBQXlHO0FBQUEsZUFKM0c7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFLQTtBQUFBLFVBRUNlLG9CQUNDLHVCQUFDLFVBQUssV0FBVSxxSUFDZDtBQUFBLG1DQUFDLGdCQUFhLFdBQVUsaUJBQXhCO0FBQUE7QUFBQTtBQUFBO0FBQUEsbUJBQXFDO0FBQUEsWUFBRztBQUFBLFlBQUVmLGFBQWEsT0FBTyxlQUFlO0FBQUEsZUFEL0U7QUFBQTtBQUFBO0FBQUE7QUFBQSxpQkFFQTtBQUFBLGFBWEo7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQWFBO0FBQUEsUUFHQSx1QkFBQyxTQUFJLFdBQVUsd0RBQ1pMLG1CQUFTQSxZQURaO0FBQUE7QUFBQTtBQUFBO0FBQUEsZUFFQTtBQUFBLFFBR0EsdUJBQUMsU0FBSSxXQUFVLGFBQ1oyQixrQkFBUU8sSUFBSSxDQUFDQyxRQUFRO0FBQ3BCLGdCQUFNQyxhQUFhN0IsbUJBQW1CNEIsSUFBSVA7QUFDMUMsZ0JBQU1TLGVBQWVqQixvQkFBb0JwQixTQUFTc0MsbUJBQW1CSCxJQUFJUDtBQUV6RSxpQkFDRTtBQUFBLFlBQUM7QUFBQTtBQUFBLGNBRUMsU0FBUyxNQUFNO0FBQ2Isb0JBQUksQ0FBQ1Isa0JBQWtCO0FBQ3JCWixvQ0FBa0IyQixJQUFJUCxHQUFHO0FBQUEsZ0JBQzNCO0FBQUEsY0FDRjtBQUFBLGNBQ0EsV0FBVywrRUFDVFEsYUFDSSx5RkFDQSx3RUFBd0UsSUFDMUVoQixtQkFBbUIsbUJBQW1CLEVBQUU7QUFBQSxjQUU1QztBQUFBO0FBQUEsa0JBQUM7QUFBQTtBQUFBLG9CQUNDLFdBQVcsMkdBQ1RnQixhQUNJLGdDQUNBLHFEQUFxRDtBQUFBLG9CQUcxREQsY0FBSVA7QUFBQUE7QUFBQUEsa0JBUFA7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLGdCQVFBO0FBQUEsZ0JBQ0EsdUJBQUMsVUFBSyxXQUFVLDZDQUNiTyxjQUFJTixRQURQO0FBQUE7QUFBQTtBQUFBO0FBQUEsdUJBRUE7QUFBQTtBQUFBO0FBQUEsWUF2QktNLElBQUlQO0FBQUFBLFlBRFg7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxVQXlCQTtBQUFBLFFBRUosQ0FBQyxLQWpDSDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBa0NBO0FBQUEsUUFHQ2hCLFlBQ0M7QUFBQSxVQUFDO0FBQUE7QUFBQSxZQUNDLElBQUksZ0JBQWdCWixTQUFTdUIsRUFBRTtBQUFBLFlBQy9CLFdBQVcsc0RBQ1RYLFNBQVNJLFlBQ0wsdURBQ0Esb0RBQW9EO0FBQUEsWUFHMUQ7QUFBQSxxQ0FBQyxTQUFJLFdBQVUsNkNBQ1pKLG1CQUFTSSxZQUNSLG1DQUNFO0FBQUEsdUNBQUMsZ0JBQWEsV0FBVSw0QkFBeEI7QUFBQTtBQUFBO0FBQUE7QUFBQSx1QkFBZ0Q7QUFBQSxnQkFDaEQsdUJBQUMsVUFBSyxXQUFVLGtCQUFrQlYsWUFBRSxjQUFjLEtBQWxEO0FBQUE7QUFBQTtBQUFBO0FBQUEsdUJBQW9EO0FBQUEsbUJBRnREO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBR0EsSUFFQSxtQ0FDRTtBQUFBLHVDQUFDLFdBQVEsV0FBVSw0QkFBbkI7QUFBQTtBQUFBO0FBQUE7QUFBQSx1QkFBMkM7QUFBQSxnQkFDM0MsdUJBQUMsVUFBSyxXQUFVLGtCQUFrQkEsWUFBRSxnQkFBZ0IsS0FBcEQ7QUFBQTtBQUFBO0FBQUE7QUFBQSx1QkFBc0Q7QUFBQSxtQkFGeEQ7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFHQSxLQVZKO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBWUE7QUFBQSxjQUVDTSxTQUFTSSxhQUFhSixTQUFTSyxhQUM5Qix1QkFBQyxTQUFJLFdBQVUsb0VBQ2I7QUFBQSx1Q0FBQyxTQUFJLFdBQVUsMkVBQ1pYLFlBQUUsaUJBQWlCLEtBRHRCO0FBQUE7QUFBQTtBQUFBO0FBQUEsdUJBRUE7QUFBQSxnQkFDQSx1QkFBQyxTQUFJLFdBQVUsdUNBQ1pNLG1CQUFTSyxhQURaO0FBQUE7QUFBQTtBQUFBO0FBQUEsdUJBRUE7QUFBQSxnQkFDQSx1QkFBQyxTQUFJLFdBQVUsbURBQ1pMLG1CQUFTTyxlQURaO0FBQUE7QUFBQTtBQUFBO0FBQUEsdUJBRUE7QUFBQSxtQkFURjtBQUFBO0FBQUE7QUFBQTtBQUFBLHFCQVVBO0FBQUEsY0FHRCxDQUFDUCxTQUFTSSxhQUNULHVCQUFDLFNBQUksV0FBVSw4QkFDWlgsdUJBQWEsT0FBTyxpSEFBaUgsc0lBRHhJO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBRUE7QUFBQTtBQUFBO0FBQUEsVUF2Q0o7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBLFFBeUNBO0FBQUEsUUFJRCxDQUFDZSxvQkFDQSx1QkFBQyxTQUFJLFdBQVUseUJBQ2I7QUFBQSxVQUFDO0FBQUE7QUFBQSxZQUNDLElBQUkscUJBQXFCcEIsU0FBU3VCLEVBQUU7QUFBQSxZQUNwQyxTQUFTRjtBQUFBQSxZQUNULFVBQVUsQ0FBQ2Qsa0JBQWtCRztBQUFBQSxZQUM3QixXQUFXLHFIQUNULENBQUNILGtCQUFrQkcsYUFDZixtREFDQSwwRkFBMEY7QUFBQSxZQUdoRztBQUFBLHFDQUFDLFVBQU1BLHVCQUFjTCxhQUFhLE9BQU8sb0JBQW9CLGlCQUFrQkMsRUFBRSxvQkFBb0IsS0FBckc7QUFBQTtBQUFBO0FBQUE7QUFBQSxxQkFBdUc7QUFBQSxjQUN2Ryx1QkFBQyxjQUFXLFdBQVUsaUJBQXRCO0FBQUE7QUFBQTtBQUFBO0FBQUEscUJBQW1DO0FBQUE7QUFBQTtBQUFBLFVBWHJDO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxRQVlBLEtBYkY7QUFBQTtBQUFBO0FBQUE7QUFBQSxlQWNBO0FBQUE7QUFBQTtBQUFBLElBNUhKO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQTtBQUFBO0FBQUE7QUFBQSxFQThIQTtBQUVKO0FBQUVGLEdBL0tXTCxpQkFBK0M7QUFBQSxVQU1sQ0QsV0FBVztBQUFBO0FBQUEsS0FOeEJDO0FBQStDLElBQUF3QztBQUFBLGFBQUFBLElBQUEiLCJuYW1lcyI6WyJ1c2VTdGF0ZSIsIkNoZWNrQ2lyY2xlMiIsIlhDaXJjbGUiLCJBcnJvd1JpZ2h0IiwidXNlTGFuZ3VhZ2UiLCJDdGZRdWVzdGlvbkNhcmQiLCJxdWVzdGlvbiIsImluZGV4IiwidG90YWxRdWVzdGlvbnMiLCJvblN1Ym1pdEFuc3dlciIsIl9zIiwibGFuZ3VhZ2UiLCJ0Iiwic2VsZWN0ZWRPcHRpb24iLCJzZXRTZWxlY3RlZE9wdGlvbiIsInNlbGVjdGVkX2Fuc3dlciIsInN1Ym1pdHRpbmciLCJzZXRTdWJtaXR0aW5nIiwiZmVlZGJhY2siLCJzZXRGZWVkYmFjayIsImlzX2NvcnJlY3QiLCJ1bmRlZmluZWQiLCJpc0NvcnJlY3QiLCJyb290Q2F1c2UiLCJyb290X2NhdXNlIiwiZXhwbGFuYXRpb24iLCJpc0FscmVhZHlDb3JyZWN0IiwiaGFuZGxlU3VibWl0IiwicmVzIiwiaWQiLCJlcnIiLCJjb25zb2xlIiwiZXJyb3IiLCJvcHRpb25zIiwia2V5IiwidGV4dCIsIm9wdGlvbl9hIiwib3B0aW9uX2IiLCJvcHRpb25fYyIsIm9wdGlvbl9kIiwibWFwIiwib3B0IiwiaXNTZWxlY3RlZCIsImlzT3B0Q29ycmVjdCIsImNvcnJlY3RfYW5zd2VyIiwiX2MiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiQ3RmUXVlc3Rpb25DYXJkLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QsIHsgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBRdWVzdGlvbiB9IGZyb20gJy4uLy4uL3R5cGVzJztcbmltcG9ydCB7IENoZWNrQ2lyY2xlMiwgWENpcmNsZSwgSGVscENpcmNsZSwgQXJyb3dSaWdodCwgU2hpZWxkQWxlcnQgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgdXNlTGFuZ3VhZ2UgfSBmcm9tICcuLi8uLi9jb250ZXh0L0xhbmd1YWdlQ29udGV4dCc7XG5cbmludGVyZmFjZSBDdGZRdWVzdGlvbkNhcmRQcm9wcyB7XG4gIHF1ZXN0aW9uOiBRdWVzdGlvbjtcbiAgaW5kZXg6IG51bWJlcjtcbiAgdG90YWxRdWVzdGlvbnM6IG51bWJlcjtcbiAgb25TdWJtaXRBbnN3ZXI6IChxdWVzdGlvbklkOiBudW1iZXIsIHNlbGVjdGVkT3B0aW9uOiBzdHJpbmcpID0+IFByb21pc2U8e1xuICAgIGlzQ29ycmVjdDogYm9vbGVhbjtcbiAgICByb290Q2F1c2U6IHN0cmluZyB8IG51bGw7XG4gICAgZXhwbGFuYXRpb246IHN0cmluZztcbiAgfT47XG59XG5cbmV4cG9ydCBjb25zdCBDdGZRdWVzdGlvbkNhcmQ6IFJlYWN0LkZDPEN0ZlF1ZXN0aW9uQ2FyZFByb3BzPiA9ICh7XG4gIHF1ZXN0aW9uLFxuICBpbmRleCxcbiAgdG90YWxRdWVzdGlvbnMsXG4gIG9uU3VibWl0QW5zd2VyXG59KSA9PiB7XG4gIGNvbnN0IHsgbGFuZ3VhZ2UsIHQgfSA9IHVzZUxhbmd1YWdlKCk7XG4gIGNvbnN0IFtzZWxlY3RlZE9wdGlvbiwgc2V0U2VsZWN0ZWRPcHRpb25dID0gdXNlU3RhdGU8c3RyaW5nPihxdWVzdGlvbi5zZWxlY3RlZF9hbnN3ZXIgfHwgJycpO1xuICBjb25zdCBbc3VibWl0dGluZywgc2V0U3VibWl0dGluZ10gPSB1c2VTdGF0ZShmYWxzZSk7XG4gIGNvbnN0IFtmZWVkYmFjaywgc2V0RmVlZGJhY2tdID0gdXNlU3RhdGU8e1xuICAgIGlzQ29ycmVjdDogYm9vbGVhbjtcbiAgICByb290Q2F1c2U6IHN0cmluZyB8IG51bGw7XG4gICAgZXhwbGFuYXRpb246IHN0cmluZztcbiAgfSB8IG51bGw+KFxuICAgIHF1ZXN0aW9uLmlzX2NvcnJlY3QgIT09IHVuZGVmaW5lZCAmJiBxdWVzdGlvbi5pc19jb3JyZWN0ICE9PSBudWxsXG4gICAgICA/IHtcbiAgICAgICAgICBpc0NvcnJlY3Q6IHF1ZXN0aW9uLmlzX2NvcnJlY3QgPT09IDEsXG4gICAgICAgICAgcm9vdENhdXNlOiBxdWVzdGlvbi5yb290X2NhdXNlIHx8IG51bGwsXG4gICAgICAgICAgZXhwbGFuYXRpb246IHF1ZXN0aW9uLmV4cGxhbmF0aW9uIHx8ICcnXG4gICAgICAgIH1cbiAgICAgIDogbnVsbFxuICApO1xuXG4gIGNvbnN0IGlzQWxyZWFkeUNvcnJlY3QgPSBmZWVkYmFjaz8uaXNDb3JyZWN0ID09PSB0cnVlIHx8IHF1ZXN0aW9uLmlzX2NvcnJlY3QgPT09IDE7XG5cbiAgY29uc3QgaGFuZGxlU3VibWl0ID0gYXN5bmMgKCkgPT4ge1xuICAgIGlmICghc2VsZWN0ZWRPcHRpb24gfHwgc3VibWl0dGluZyB8fCBpc0FscmVhZHlDb3JyZWN0KSByZXR1cm47XG5cbiAgICB0cnkge1xuICAgICAgc2V0U3VibWl0dGluZyh0cnVlKTtcbiAgICAgIGNvbnN0IHJlcyA9IGF3YWl0IG9uU3VibWl0QW5zd2VyKHF1ZXN0aW9uLmlkLCBzZWxlY3RlZE9wdGlvbik7XG4gICAgICBzZXRGZWVkYmFjayhyZXMpO1xuICAgIH0gY2F0Y2ggKGVycikge1xuICAgICAgY29uc29sZS5lcnJvcihlcnIpO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRTdWJtaXR0aW5nKGZhbHNlKTtcbiAgICB9XG4gIH07XG5cbiAgY29uc3Qgb3B0aW9ucyA9IFtcbiAgICB7IGtleTogJ0EnLCB0ZXh0OiBxdWVzdGlvbi5vcHRpb25fYSB9LFxuICAgIHsga2V5OiAnQicsIHRleHQ6IHF1ZXN0aW9uLm9wdGlvbl9iIH0sXG4gICAgeyBrZXk6ICdDJywgdGV4dDogcXVlc3Rpb24ub3B0aW9uX2MgfSxcbiAgICB7IGtleTogJ0QnLCB0ZXh0OiBxdWVzdGlvbi5vcHRpb25fZCB9LFxuICBdO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBcbiAgICAgIGlkPXtgcXVlc3Rpb24tY2FyZC0ke3F1ZXN0aW9uLmlkfWB9XG4gICAgICBjbGFzc05hbWU9XCJiZy1bIzExMTgyMF0gYm9yZGVyIGJvcmRlci1bIzI2MzI0MV0gcm91bmRlZC14bCBwLTQgc206cC01IHNwYWNlLXktNCBzaGFkb3ctbGdcIlxuICAgID5cbiAgICAgIHsvKiBIZWFkZXIgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC13cmFwIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gZ2FwLTIgYm9yZGVyLWIgYm9yZGVyLVsjMjYzMjQxXSBwYi0zXCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LVsxMXB4XSBmb250LW1vbm8gcHgtMiBweS0wLjUgcm91bmRlZCBiZy1bIzE2MUYyOV0gYm9yZGVyIGJvcmRlci1bIzI2MzI0MV0gdGV4dC1bI0Y1QzU0Ml0gZm9udC1ib2xkXCI+XG4gICAgICAgICAgICB7bGFuZ3VhZ2UgPT09ICd0aCcgPyBg4LiE4Liz4LiW4Liy4Lih4LiC4LmJ4LitICR7aW5kZXggKyAxfSDguIjguLLguIEgJHt0b3RhbFF1ZXN0aW9uc31gIDogYFFVRVNUSU9OICR7aW5kZXggKyAxfSBPRiAke3RvdGFsUXVlc3Rpb25zfWB9XG4gICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1bIzhEOUJBOF1cIj57bGFuZ3VhZ2UgPT09ICd0aCcgPyAn4LiB4Liy4Lij4LiV4Lij4Lin4LiI4Liq4Lit4Lia4LiE4Liz4LiV4Lit4LiaIENURicgOiAnQ1RGIFZlcmlmaWNhdGlvbid9PC9zcGFuPlxuICAgICAgICA8L2Rpdj5cblxuICAgICAgICB7aXNBbHJlYWR5Q29ycmVjdCAmJiAoXG4gICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTEgdGV4dC14cyBmb250LW1vbm8gdGV4dC1bIzJFQ0M3MV0gZm9udC1ib2xkIGJnLVsjMkVDQzcxXS8xMCBweC0yIHB5LTAuNSByb3VuZGVkIGJvcmRlciBib3JkZXItWyMyRUNDNzFdLzMwXCI+XG4gICAgICAgICAgICA8Q2hlY2tDaXJjbGUyIGNsYXNzTmFtZT1cInctMy41IGgtMy41XCIgLz4ge2xhbmd1YWdlID09PSAndGgnID8gJ+C4leC4reC4muC4luC4ueC4geC5geC4peC5ieC4pycgOiAnU09MVkVEJ31cbiAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICl9XG4gICAgICA8L2Rpdj5cblxuICAgICAgey8qIFF1ZXN0aW9uIFRleHQgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1zZW1pYm9sZCB0ZXh0LVsjRjRGNkY4XSBsZWFkaW5nLXJlbGF4ZWRcIj5cbiAgICAgICAge3F1ZXN0aW9uLnF1ZXN0aW9ufVxuICAgICAgPC9kaXY+XG5cbiAgICAgIHsvKiBPcHRpb25zIExpc3QgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICB7b3B0aW9ucy5tYXAoKG9wdCkgPT4ge1xuICAgICAgICAgIGNvbnN0IGlzU2VsZWN0ZWQgPSBzZWxlY3RlZE9wdGlvbiA9PT0gb3B0LmtleTtcbiAgICAgICAgICBjb25zdCBpc09wdENvcnJlY3QgPSBpc0FscmVhZHlDb3JyZWN0ICYmIHF1ZXN0aW9uLmNvcnJlY3RfYW5zd2VyID09PSBvcHQua2V5O1xuXG4gICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgIDxsYWJlbFxuICAgICAgICAgICAgICBrZXk9e29wdC5rZXl9XG4gICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHtcbiAgICAgICAgICAgICAgICBpZiAoIWlzQWxyZWFkeUNvcnJlY3QpIHtcbiAgICAgICAgICAgICAgICAgIHNldFNlbGVjdGVkT3B0aW9uKG9wdC5rZXkpO1xuICAgICAgICAgICAgICAgIH1cbiAgICAgICAgICAgICAgfX1cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTMgcC0zIHJvdW5kZWQtbGcgYm9yZGVyIGN1cnNvci1wb2ludGVyIHRyYW5zaXRpb24tYWxsICR7XG4gICAgICAgICAgICAgICAgaXNTZWxlY3RlZFxuICAgICAgICAgICAgICAgICAgPyAnYmctWyMxNjFGMjldIGJvcmRlci1bI0Y1QzU0Ml0gc2hhZG93LVswXzBfMTBweF9yZ2JhKDI0NSwxOTcsNjYsMC4xNSldIHRleHQtWyNGNEY2RjhdJ1xuICAgICAgICAgICAgICAgICAgOiAnYmctWyMwQjBGMTRdIGJvcmRlci1bIzI2MzI0MV0gaG92ZXI6Ym9yZGVyLVsjOEQ5QkE4XS82MCB0ZXh0LVsjOEQ5QkE4XSdcbiAgICAgICAgICAgICAgfSAke2lzQWxyZWFkeUNvcnJlY3QgPyAnY3Vyc29yLWRlZmF1bHQnIDogJyd9YH1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPGRpdiBcbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2B3LTYgaC02IHJvdW5kZWQgZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgZm9udC1tb25vIHRleHQteHMgZm9udC1ib2xkIHNocmluay0wIHRyYW5zaXRpb24tY29sb3JzICR7XG4gICAgICAgICAgICAgICAgICBpc1NlbGVjdGVkIFxuICAgICAgICAgICAgICAgICAgICA/ICdiZy1bI0Y1QzU0Ml0gdGV4dC1bIzBCMEYxNF0nIFxuICAgICAgICAgICAgICAgICAgICA6ICdiZy1bIzE2MUYyOV0gdGV4dC1bIzhEOUJBOF0gYm9yZGVyIGJvcmRlci1bIzI2MzI0MV0nXG4gICAgICAgICAgICAgICAgfWB9XG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICB7b3B0LmtleX1cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQteHMgbGVhZGluZy1ub3JtYWwgZm9udC1tZWRpdW0gZmxleC0xXCI+XG4gICAgICAgICAgICAgICAge29wdC50ZXh0fVxuICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICA8L2xhYmVsPlxuICAgICAgICAgICk7XG4gICAgICAgIH0pfVxuICAgICAgPC9kaXY+XG5cbiAgICAgIHsvKiBGZWVkYmFjayBCYW5uZXIgKi99XG4gICAgICB7ZmVlZGJhY2sgJiYgKFxuICAgICAgICA8ZGl2IFxuICAgICAgICAgIGlkPXtgZmVlZGJhY2stYm94LSR7cXVlc3Rpb24uaWR9YH1cbiAgICAgICAgICBjbGFzc05hbWU9e2BwLTQgcm91bmRlZC1sZyBib3JkZXIgYW5pbWF0ZS1pbiBmYWRlLWluIHNwYWNlLXktMiAke1xuICAgICAgICAgICAgZmVlZGJhY2suaXNDb3JyZWN0XG4gICAgICAgICAgICAgID8gJ2JnLVsjMkVDQzcxXS8xMCBib3JkZXItWyMyRUNDNzFdLzQwIHRleHQtWyNGNEY2RjhdJ1xuICAgICAgICAgICAgICA6ICdiZy1bI0ZGNTI1Ml0vMTAgYm9yZGVyLVsjRkY1MjUyXS80MCB0ZXh0LVsjRjRGNkY4XSdcbiAgICAgICAgICB9YH1cbiAgICAgICAgPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgZm9udC1ib2xkIHRleHQteHNcIj5cbiAgICAgICAgICAgIHtmZWVkYmFjay5pc0NvcnJlY3QgPyAoXG4gICAgICAgICAgICAgIDw+XG4gICAgICAgICAgICAgICAgPENoZWNrQ2lyY2xlMiBjbGFzc05hbWU9XCJ3LTQgaC00IHRleHQtWyMyRUNDNzFdXCIgLz5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LVsjMkVDQzcxXVwiPnt0KCdyb29tLmNvcnJlY3QnKX08L3NwYW4+XG4gICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgICA8WENpcmNsZSBjbGFzc05hbWU9XCJ3LTQgaC00IHRleHQtWyNGRjUyNTJdXCIgLz5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LVsjRkY1MjUyXVwiPnt0KCdyb29tLmluY29ycmVjdCcpfTwvc3Bhbj5cbiAgICAgICAgICAgICAgPC8+XG4gICAgICAgICAgICApfVxuICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAge2ZlZWRiYWNrLmlzQ29ycmVjdCAmJiBmZWVkYmFjay5yb290Q2F1c2UgJiYgKFxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJwLTIuNSByb3VuZGVkIGJnLVsjMEIwRjE0XS83MCBib3JkZXIgYm9yZGVyLVsjMkVDQzcxXS8zMCB0ZXh0LXhzXCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZm9udC1ib2xkIHRleHQtWyNGNUM1NDJdIHVwcGVyY2FzZSB0ZXh0LVsxMHB4XSBmb250LW1vbm8gdHJhY2tpbmctd2lkZXJcIj5cbiAgICAgICAgICAgICAgICB7dCgncm9vbS5yb290X2NhdXNlJyl9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZvbnQtc2VtaWJvbGQgdGV4dC1bI0Y0RjZGOF0gbXQtMC41XCI+XG4gICAgICAgICAgICAgICAge2ZlZWRiYWNrLnJvb3RDYXVzZX1cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1bIzhEOUJBOF0gdGV4dC1bMTFweF0gbXQtMSBsZWFkaW5nLXJlbGF4ZWRcIj5cbiAgICAgICAgICAgICAgICB7ZmVlZGJhY2suZXhwbGFuYXRpb259XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKX1cblxuICAgICAgICAgIHshZmVlZGJhY2suaXNDb3JyZWN0ICYmIChcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1bMTFweF0gdGV4dC1bIzhEOUJBOF1cIj5cbiAgICAgICAgICAgICAge2xhbmd1YWdlID09PSAndGgnID8gJ+C4leC4o+C4p+C4iOC4quC4reC4muC5geC4nOC4meC4nOC4seC4h+C5gOC4hOC4o+C4t+C4reC4guC5iOC4suC4ouC5geC4peC4sOC4nOC4peC4peC4seC4nuC4mOC5jOC4iOC4suC4gSBDTEkg4Lit4Li14LiB4LiE4Lij4Lix4LmJ4LiHIOC4q+C4o+C4t+C4reC5gOC4m+C4tOC4lOC4hOC4s+C5g+C4muC5ieC5g+C4meC4guC4seC5ieC4meC4leC4reC4meC4l+C4teC5iCA0IOC5gOC4nuC4t+C5iOC4reC4hOC5ieC4meC4q+C4suC4iOC4uOC4lOC4l+C4teC5iOC5geC4nuC5h+C4geC5gOC4geC5h+C4leC4luC4ueC4geC4l+C4tOC5ieC4hycgOiAnUmUtZXhhbWluZSB0aGUgbmV0d29yayB0b3BvbG9neSBhbmQgZGlhZ25vc3RpYyBDTEkgb3V0cHV0LCBvciB1bmxvY2sgYSBoaW50IGluIFRhc2sgNCB0byB0cmFjZSB3aGVyZSB0aGUgcGFja2V0IGZsb3cgaXMgZHJvcHBlZC4nfVxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKX1cbiAgICAgICAgPC9kaXY+XG4gICAgICApfVxuXG4gICAgICB7LyogQWN0aW9uIEJ1dHRvbiAqL31cbiAgICAgIHshaXNBbHJlYWR5Q29ycmVjdCAmJiAoXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBqdXN0aWZ5LWVuZCBwdC0yXCI+XG4gICAgICAgICAgPGJ1dHRvblxuICAgICAgICAgICAgaWQ9e2BzdWJtaXQtYW5zd2VyLWJ0bi0ke3F1ZXN0aW9uLmlkfWB9XG4gICAgICAgICAgICBvbkNsaWNrPXtoYW5kbGVTdWJtaXR9XG4gICAgICAgICAgICBkaXNhYmxlZD17IXNlbGVjdGVkT3B0aW9uIHx8IHN1Ym1pdHRpbmd9XG4gICAgICAgICAgICBjbGFzc05hbWU9e2BmbGV4IHctZnVsbCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgZ2FwLTIgcm91bmRlZC1sZyBweC00IHB5LTIgdGV4dC14cyBmb250LXNlbWlib2xkIHRyYW5zaXRpb24tYWxsIHNtOnctYXV0byAke1xuICAgICAgICAgICAgICAhc2VsZWN0ZWRPcHRpb24gfHwgc3VibWl0dGluZ1xuICAgICAgICAgICAgICAgID8gJ2JnLVsjMjYzMjQxXSB0ZXh0LVsjOEQ5QkE4XSBjdXJzb3Itbm90LWFsbG93ZWQnXG4gICAgICAgICAgICAgICAgOiAnYmctWyNGNUM1NDJdIHRleHQtWyMwQjBGMTRdIGhvdmVyOmJnLVsjRjVDNTQyXS85MCBzaGFkb3ctWzBfMF8xNXB4X3JnYmEoMjQ1LDE5Nyw2NiwwLjMpXSdcbiAgICAgICAgICAgIH1gfVxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxzcGFuPntzdWJtaXR0aW5nID8gKGxhbmd1YWdlID09PSAndGgnID8gJ+C4geC4s+C4peC4seC4h+C4leC4o+C4p+C4iOC4quC4reC4mi4uLicgOiAnVmVyaWZ5aW5nLi4uJykgOiB0KCdyb29tLnN1Ym1pdF9hbnN3ZXInKX08L3NwYW4+XG4gICAgICAgICAgICA8QXJyb3dSaWdodCBjbGFzc05hbWU9XCJ3LTMuNSBoLTMuNVwiIC8+XG4gICAgICAgICAgPC9idXR0b24+XG4gICAgICAgIDwvZGl2PlxuICAgICAgKX1cbiAgICA8L2Rpdj5cbiAgKTtcbn07XG4iXSwiZmlsZSI6IkM6L1VzZXJzL01PTktDU0svRGVza3RvcC9DVEYvbmV0d29yay1lbmdpbmVlci1jYXB0dXJlLXRoZS1mbGFnL3NyYy9jb21wb25lbnRzL21pc3Npb24vQ3RmUXVlc3Rpb25DYXJkLnRzeCJ9
