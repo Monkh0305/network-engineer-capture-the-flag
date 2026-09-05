@@ -1,5 +1,100 @@
 @import "tailwindcss";
 
+html {
+  /* Keep the viewport width stable when navigating between short and long pages. */
+  scrollbar-gutter: stable;
+}
+
+/* Shared motion language. The existing animate-in/fade-in utilities are used
+   across pages, so defining them here keeps route transitions consistent. */
+@keyframes ctf-page-enter {
+  from { opacity: 0; translate: 0 10px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes ctf-card-enter {
+  from { opacity: 0; translate: 0 14px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes ctf-zoom-enter {
+  from { opacity: 0; scale: 0.97; }
+  to { opacity: 1; scale: 1; }
+}
+
+@keyframes ctf-nav-indicator-enter {
+  from { opacity: 0; scale: 0.35 1; }
+  to { opacity: 1; scale: 1 1; }
+}
+
+@keyframes ctf-route-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes ctf-route-exit {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to { opacity: 0; transform: translate3d(0, -10px, 0) scale(0.992); }
+}
+
+@keyframes ctf-route-reveal {
+  from { opacity: 0; transform: translate3d(0, 16px, 0) scale(0.992); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+.route-page-enter {
+  animation: ctf-route-enter 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+.route-page-leaving {
+  pointer-events: none;
+  animation: ctf-route-exit 240ms cubic-bezier(0.4, 0, 1, 1) both;
+  will-change: opacity, transform;
+}
+
+.animate-in.fade-in {
+  animation: ctf-page-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-in.zoom-in-95 {
+  animation: ctf-zoom-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-in .dashboard-content-card {
+  animation: ctf-card-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-in .dashboard-content-card:nth-of-type(2) { animation-delay: 45ms; }
+.animate-in .dashboard-content-card:nth-of-type(3) { animation-delay: 90ms; }
+.animate-in .dashboard-content-card:nth-of-type(4) { animation-delay: 135ms; }
+.animate-in .dashboard-content-card:nth-of-type(n + 5) { animation-delay: 180ms; }
+
+.data-card-enter {
+  animation: ctf-card-enter 540ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.topnav-active-indicator {
+  transform-origin: center;
+  animation: ctf-nav-indicator-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-in.fade-in,
+  .animate-in.zoom-in-95,
+  .animate-in .dashboard-content-card,
+  .data-card-enter,
+  .topnav-active-indicator {
+    animation: none;
+  }
+}
+
 :root {
   --ctf-bg: #eef3f9;
   --ctf-surface: rgb(255 255 255 / 0.82);
@@ -35,6 +130,23 @@
   --ctf-track: rgb(148 163 184 / 0.14);
   --ctf-shadow-sm: 0 2px 10px rgb(0 0 0 / 0.25), 0 12px 36px rgb(0 0 0 / 0.18);
   --ctf-shadow-lg: 0 20px 60px rgb(0 0 0 / 0.35), 0 4px 14px rgb(0 0 0 / 0.24);
+}
+
+.admin-shell {
+  background-image:
+    radial-gradient(circle at 88% 4%, rgb(139 92 246 / 0.1), transparent 24rem),
+    radial-gradient(circle at 38% 100%, rgb(34 211 238 / 0.07), transparent 28rem),
+    radial-gradient(rgb(51 65 85 / 0.2) 1px, transparent 1px);
+  background-size: auto, auto, 24px 24px;
+}
+
+.admin-sidebar-scroll {
+  scrollbar-color: rgb(71 85 105 / 0.8) transparent;
+  scrollbar-width: thin;
+}
+
+.admin-placeholder-card {
+  min-height: clamp(24rem, 58vh, 38rem);
 }
 
 /* Shared light visual language for content pages, matching the dashboard. */

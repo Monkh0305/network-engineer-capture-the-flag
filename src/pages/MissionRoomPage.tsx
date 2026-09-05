@@ -65,6 +65,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
 
       setMission(localizeMission(mRes.mission, language));
       setTasks(mRes.tasks);
+      setActiveTask(mRes.tasks[0]?.order_index ?? 1);
       setHints(mRes.hints.map(h => localizeHint(h, language)));
       setQuestions(qRes.questions.map(q => localizeQuestion(q, language)));
 
@@ -95,11 +96,18 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
   };
 
   const handleNextTask = () => {
-    if (activeTask < 6) {
-      const next = activeTask + 1;
+    const currentIndex = taskNavItems.findIndex((item) => item.order === activeTask);
+    const next = taskNavItems[currentIndex + 1]?.order;
+    if (next !== undefined) {
       setCompletedTaskIds(prev => Array.from(new Set([...prev, activeTask])));
       setActiveTask(next);
     }
+  };
+
+  const handlePreviousTask = () => {
+    const currentIndex = taskNavItems.findIndex((item) => item.order === activeTask);
+    const previous = taskNavItems[currentIndex - 1]?.order;
+    if (previous !== undefined) setActiveTask(previous);
   };
 
   const handleAnswerSubmit = async (questionId: number, selectedAnswer: string) => {
@@ -139,7 +147,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
 
   const handleDownloadLab = () => {
     if (!mission) return;
-    const url = api.getLabDownloadUrl(mission.packet_tracer_file);
+    const url = api.getLabDownloadUrl(mission.packet_tracer_file, mission.id);
     const link = document.createElement('a');
     link.href = url;
     link.download = mission.packet_tracer_file;
@@ -164,14 +172,16 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
 
   const isAllQuestionsSolved = questions.length > 0 && questions.every(q => q.is_correct === 1);
 
-  const taskNavItems = [
-    { order: 1, title: t('room.task1'), icon: FileText },
-    { order: 2, title: t('room.task2'), icon: Network },
-    { order: 3, title: t('room.task3'), icon: Terminal },
-    { order: 4, title: t('room.task4'), icon: Search },
-    { order: 5, title: t('room.task5'), icon: HelpCircle },
-    { order: 6, title: t('room.task6'), icon: Flag },
-  ];
+  const taskIcons = { scenario: FileText, diagram: Network, lab: Terminal, investigation: Search, questions: HelpCircle, flag: Flag };
+  const taskNavItems = tasks.map((task) => ({
+    order: task.order_index,
+    title: task.title,
+    icon: taskIcons[task.task_type as keyof typeof taskIcons] || FileText,
+    type: task.task_type,
+    content: task.content,
+  }));
+  const activeTaskItem = taskNavItems.find((item) => item.order === activeTask) || taskNavItems[0];
+  const activeTaskType = activeTaskItem?.type;
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-300">
@@ -188,7 +198,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
         <div className="flex items-center gap-2 text-xs font-mono text-[#8D9BA8]">
           <span>{mission.stage_name}</span>
           <ChevronRight className="w-3.5 h-3.5 text-[#263241]" />
-          <span className="text-[#F5C542] font-bold">{language === 'th' ? `ภารกิจที่ ${String(mission.order_index).padStart(2, '0')}` : `Mission ${String(mission.order_index).padStart(2, '0')}`}</span>
+          <span className="text-[#F5C542] font-bold">{language === 'th' ? `ภารกิจที่ ${String(mission.mission_number ?? mission.order_index).padStart(2, '0')}` : `Mission ${String(mission.mission_number ?? mission.order_index).padStart(2, '0')}`}</span>
         </div>
       </div>
 
@@ -201,7 +211,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
           <div className="space-y-2 border-b border-[#263241] pb-4">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-[#8D9BA8]">
-                MISSION {String(mission.order_index).padStart(2, '0')}
+                MISSION {String(mission.mission_number ?? mission.order_index).padStart(2, '0')}
               </span>
               <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
                 mission.difficulty === 'Easy' ? 'text-[#2ECC71] bg-[#2ECC71]/10 border-[#2ECC71]/30' :
@@ -285,8 +295,14 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
         {/* Right Column: Main Content Workspace (8 cols) */}
         <div className="lg:col-span-8 space-y-6">
 
+          {activeTaskItem?.content && (
+            <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/[0.05] px-4 py-3 text-xs leading-6 text-slate-300">
+              <span className="mr-2 font-mono font-bold text-cyan-300">TASK BRIEF:</span>{activeTaskItem.content}
+            </div>
+          )}
+
           {/* TASK 1: SCENARIO */}
-          {activeTask === 1 && (
+          {activeTaskType === 'scenario' && (
             <div id="task-1-scenario-panel" className="bg-[#111820] border border-[#263241] rounded-2xl p-4 sm:p-6 space-y-6 shadow-xl animate-in fade-in">
               <div className="flex flex-col gap-3 border-b border-[#263241] pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -350,7 +366,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
           )}
 
           {/* TASK 2: NETWORK DIAGRAM */}
-          {activeTask === 2 && (
+          {activeTaskType === 'diagram' && (
             <div id="task-2-diagram-panel" className="bg-[#111820] border border-[#263241] rounded-2xl p-4 sm:p-6 space-y-6 shadow-xl animate-in fade-in">
               <div className="flex flex-col gap-3 border-b border-[#263241] pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -364,7 +380,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
 
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
                 <button
-                  onClick={() => setActiveTask(1)}
+                  onClick={handlePreviousTask}
                   className="w-full rounded-lg bg-[#161F29] px-4 py-2 text-center font-mono text-xs text-[#8D9BA8] hover:text-[#F4F6F8] sm:w-auto"
                 >
                   {language === 'th' ? 'ย้อนกลับไปที่คำอธิบาย' : 'Back to Scenario'}
@@ -381,7 +397,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
           )}
 
           {/* TASK 3: PACKET TRACER LAB */}
-          {activeTask === 3 && (
+          {activeTaskType === 'lab' && (
             <div id="task-3-lab-panel" className="bg-[#111820] border border-[#263241] rounded-2xl p-4 sm:p-6 space-y-6 shadow-xl animate-in fade-in">
               <div className="flex flex-col gap-3 border-b border-[#263241] pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -448,7 +464,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
 
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
                 <button
-                  onClick={() => setActiveTask(2)}
+                  onClick={handlePreviousTask}
                   className="w-full rounded-lg bg-[#161F29] px-4 py-2 text-center font-mono text-xs text-[#8D9BA8] hover:text-[#F4F6F8] sm:w-auto"
                 >
                   {language === 'th' ? 'ย้อนกลับไปแผนผัง' : 'Back to Diagram'}
@@ -465,7 +481,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
           )}
 
           {/* TASK 4: INVESTIGATION */}
-          {activeTask === 4 && (
+          {activeTaskType === 'investigation' && (
             <div id="task-4-investigation-panel" className="bg-[#111820] border border-[#263241] rounded-2xl p-4 sm:p-6 space-y-6 shadow-xl animate-in fade-in">
               <div className="flex flex-col gap-3 border-b border-[#263241] pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -524,7 +540,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
 
               <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
                 <button
-                  onClick={() => setActiveTask(3)}
+                  onClick={handlePreviousTask}
                   className="w-full rounded-lg bg-[#161F29] px-4 py-2 text-center font-mono text-xs text-[#8D9BA8] hover:text-[#F4F6F8] sm:w-auto"
                 >
                   {language === 'th' ? 'ย้อนกลับไปไฟล์แล็บ' : 'Back to Lab'}
@@ -541,7 +557,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
           )}
 
           {/* TASK 5: QUESTIONS */}
-          {activeTask === 5 && (
+          {activeTaskType === 'questions' && (
             <div id="task-5-questions-panel" className="bg-[#111820] border border-[#263241] rounded-2xl p-4 sm:p-6 space-y-6 shadow-xl animate-in fade-in">
               <div className="flex flex-col gap-3 border-b border-[#263241] pb-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -568,7 +584,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
 
               <div className="flex flex-col-reverse gap-3 border-t border-[#263241] pt-4 sm:flex-row sm:items-center sm:justify-between">
                 <button
-                  onClick={() => setActiveTask(4)}
+                  onClick={handlePreviousTask}
                   className="w-full rounded-lg bg-[#161F29] px-4 py-2 text-center font-mono text-xs text-[#8D9BA8] hover:text-[#F4F6F8] sm:w-auto"
                 >
                   {language === 'th' ? 'ย้อนกลับไปการสืบสวน' : 'Back to Investigation'}
@@ -586,7 +602,7 @@ export const MissionRoomPage: React.FC<MissionRoomPageProps> = ({
           )}
 
           {/* TASK 6: CAPTURE THE FLAG */}
-          {activeTask === 6 && (
+          {activeTaskType === 'flag' && (
             <div id="task-6-flag-panel" className="animate-in fade-in">
               <FlagSubmissionCard
                 mission={mission}

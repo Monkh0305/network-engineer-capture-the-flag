@@ -1,9 +1,299 @@
 import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
+import { hashPassword, isPasswordHash } from './security.ts';
 
 // Database file path
 const DB_FILE = path.resolve(process.cwd(), 'network_ctf.db');
 export const db = new DatabaseSync(DB_FILE);
+
+interface TableColumn {
+  name: string;
+}
+
+function toMissionSlug(title: string, id: number): string {
+  const base = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return base || `mission-${id}`;
+}
+
+function migrateMissionManagementSchema() {
+  const missionColumns = db.prepare('PRAGMA table_info(missions)').all() as unknown as TableColumn[];
+  const hasMissionColumn = (name: string) => missionColumns.some((column) => column.name === name);
+  const additions = [
+    ['mission_number', 'INTEGER'], ['slug', 'TEXT'], ['estimated_minutes', 'INTEGER'],
+    ['coin_reward', 'INTEGER NOT NULL DEFAULT 500'], ['status', "TEXT NOT NULL DEFAULT 'published'"],
+    ['learning_path_id', 'INTEGER'], ['created_at', 'TEXT'], ['updated_at', 'TEXT'],
+  ] as const;
+  for (const [name, definition] of additions) {
+    if (!hasMissionColumn(name)) db.exec(`ALTER TABLE missions ADD COLUMN ${name} ${definition}`);
+  }
+
+  const taskColumns = db.prepare('PRAGMA table_info(mission_tasks)').all() as unknown as TableColumn[];
+  if (!taskColumns.some((column) => column.name === 'is_enabled')) {
+    db.exec('ALTER TABLE mission_tasks ADD COLUMN is_enabled INTEGER NOT NULL DEFAULT 1');
+  }
+
+  const now = new Date().toISOString();
+  db.prepare(`UPDATE missions SET mission_number = order_index WHERE mission_number IS NULL`).run();
+  db.prepare(`UPDATE missions SET estimated_minutes = CAST(estimated_time AS INTEGER) WHERE estimated_minutes IS NULL`).run();
+  db.prepare(`UPDATE missions SET coin_reward = 500 WHERE coin_reward IS NULL`).run();
+  db.prepare(`UPDATE missions SET category = 'Network Fundamentals' WHERE category = 'Fundamental'`).run();
+  db.prepare(`UPDATE missions SET category = 'IP Addressing' WHERE category = 'Subnetting'`).run();
+  db.prepare(`UPDATE missions SET category = 'Switching' WHERE category = 'Default Gateway'`).run();
+  db.prepare(`UPDATE missions SET status = 'published' WHERE status IS NULL OR status NOT IN ('draft', 'published', 'archived')`).run();
+  db.prepare(`UPDATE missions SET created_at = ? WHERE created_at IS NULL`).run(now);
+  db.prepare(`UPDATE missions SET updated_at = ? WHERE updated_at IS NULL`).run(now);
+
+  const missionsWithoutSlugs = db.prepare(`SELECT id, title FROM missions WHERE slug IS NULL OR trim(slug) = ''`).all() as unknown as Array<{ id: number; title: string }>;
+  const updateSlug = db.prepare('UPDATE missions SET slug = ? WHERE id = ?');
+  for (const mission of missionsWithoutSlugs) updateSlug.run(`${toMissionSlug(mission.title, mission.id)}-${mission.id}`, mission.id);
+
+  db.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_missions_slug ON missions(slug);
+    CREATE INDEX IF NOT EXISTS idx_missions_admin_status ON missions(status, order_index);
+    CREATE INDEX IF NOT EXISTS idx_mission_tasks_order ON mission_tasks(mission_id, order_index);
+  `);
+}
+
+function migratePacketTracerLabSchema() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS packet_tracer_labs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      mission_id INTEGER NOT NULL UNIQUE,
+      original_filename TEXT NOT NULL,
+      stored_filename TEXT NOT NULL UNIQUE,
+      mime_type TEXT NOT NULL,
+      file_size INTEGER NOT NULL,
+      uploaded_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (mission_id) REFERENCES missions(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_packet_tracer_labs_mission
+      ON packet_tracer_labs(mission_id);
+  `);
+}
+
+function ensureDefaultLearningPath(createIfMissing = true) {
+  const now = new Date().toISOString();
+  let pathRow = db.prepare("SELECT id FROM learning_paths WHERE slug = 'network-engineering-roadmap'").get() as { id: number } | undefined;
+  if (!pathRow) {
+    if (!createIfMissing) return;
+    const result = db.prepare(`
+      INSERT INTO learning_paths (name, slug, description, status, order_index, created_at, updated_at)
+      VALUES (?, ?, ?, 'published', 1, ?, ?)
+    `).run('Network Engineering Roadmap', 'network-engineering-roadmap', 'เส้นทางการเรียนรู้วิศวกรรมเครือข่ายแบบเป็นลำดับ', now, now);
+    pathRow = { id: Number(result.lastInsertRowid) };
+  }
+
+  const definitions = [
+    ['Network Fundamentals', 'พื้นฐานระบบเครือข่าย', '#22D3EE'],
+    ['IP Addressing', 'การกำหนด IP และ Subnetting', '#3B82F6'],
+    ['Switching', 'การทำงานของ Switch และ Gateway', '#8B5CF6'],
+    ['VLAN', 'การแบ่งเครือข่ายด้วย VLAN', '#EC4899'],
+    ['Routing', 'การกำหนดเส้นทางเครือข่าย', '#F59E0B'],
+    ['Troubleshooting', 'การแก้ไขปัญหาเครือข่าย', '#10B981'],
+  ] as const;
+  let previousStageId: number | null = null;
+  for (let index = 0; index < definitions.length; index += 1) {
+    const [name, description, accent] = definitions[index];
+    let stage = db.prepare('SELECT id FROM learning_path_stages WHERE learning_path_id = ? AND name = ?').get(pathRow.id, name) as { id: number } | undefined;
+    if (!stage) {
+      const result = db.prepare(`
+        INSERT INTO learning_path_stages (
+          learning_path_id, name, description, icon, accent, order_index, prerequisite_stage_id, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(pathRow.id, name, description, index === 5 ? 'AlertTriangle' : index === 4 ? 'Route' : index === 0 ? 'Network' : 'Terminal', accent, index + 1, previousStageId, now, now);
+      stage = { id: Number(result.lastInsertRowid) };
+    }
+    previousStageId = stage.id;
+  }
+
+  const stages = db.prepare('SELECT id, name, order_index FROM learning_path_stages WHERE learning_path_id = ?').all(pathRow.id) as unknown as Array<{ id: number; name: string; order_index: number }>;
+  const stageByName = new Map(stages.map((stage) => [stage.name, stage]));
+  const missions = db.prepare('SELECT id, category FROM missions WHERE learning_path_stage_id IS NULL ORDER BY order_index, id').all() as unknown as Array<{ id: number; category: string }>;
+  const stageCounts = new Map<number, number>();
+  for (const stage of stages) {
+    const maximum = db.prepare('SELECT COALESCE(MAX(path_order_index),0) AS value FROM missions WHERE learning_path_stage_id=?').get(stage.id) as { value: number };
+    stageCounts.set(stage.id, maximum.value);
+  }
+  for (const mission of missions) {
+    const stageName = mission.category === 'Security' ? 'Troubleshooting' : mission.category;
+    const stage = stageByName.get(stageName) || stages[0];
+    const nextOrder = (stageCounts.get(stage.id) || 0) + 1;
+    stageCounts.set(stage.id, nextOrder);
+    db.prepare(`UPDATE missions SET learning_path_id=?, learning_path_stage_id=?, path_order_index=?, stage=?, stage_name=? WHERE id=?`)
+      .run(pathRow.id, stage.id, nextOrder, stage.order_index, stage.name, mission.id);
+  }
+}
+
+function migrateLearningPathAndAchievementSchema() {
+  const missionColumns = db.prepare('PRAGMA table_info(missions)').all() as unknown as TableColumn[];
+  if (!missionColumns.some((column) => column.name === 'learning_path_stage_id')) db.exec('ALTER TABLE missions ADD COLUMN learning_path_stage_id INTEGER');
+  if (!missionColumns.some((column) => column.name === 'path_order_index')) db.exec('ALTER TABLE missions ADD COLUMN path_order_index INTEGER');
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS learning_paths (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      description TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'draft',
+      order_index INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS learning_path_stages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      learning_path_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      icon TEXT NOT NULL DEFAULT 'Network',
+      accent TEXT NOT NULL DEFAULT '#22D3EE',
+      order_index INTEGER NOT NULL,
+      prerequisite_stage_id INTEGER,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      FOREIGN KEY (learning_path_id) REFERENCES learning_paths(id) ON DELETE CASCADE,
+      FOREIGN KEY (prerequisite_stage_id) REFERENCES learning_path_stages(id) ON DELETE SET NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_learning_paths_status ON learning_paths(status, order_index);
+    CREATE INDEX IF NOT EXISTS idx_learning_path_stages_order ON learning_path_stages(learning_path_id, order_index);
+    CREATE INDEX IF NOT EXISTS idx_missions_learning_path_order ON missions(learning_path_id, learning_path_stage_id, path_order_index);
+  `);
+
+  const achievementColumns = db.prepare('PRAGMA table_info(achievements)').all() as unknown as TableColumn[];
+  if (!achievementColumns.some((column) => column.name === 'condition_type')) db.exec("ALTER TABLE achievements ADD COLUMN condition_type TEXT NOT NULL DEFAULT 'mission_count'");
+  if (!achievementColumns.some((column) => column.name === 'condition_value')) db.exec('ALTER TABLE achievements ADD COLUMN condition_value INTEGER NOT NULL DEFAULT 1');
+  if (!achievementColumns.some((column) => column.name === 'is_active')) db.exec('ALTER TABLE achievements ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1');
+  if (!achievementColumns.some((column) => column.name === 'created_at')) db.exec('ALTER TABLE achievements ADD COLUMN created_at TEXT');
+  if (!achievementColumns.some((column) => column.name === 'updated_at')) db.exec('ALTER TABLE achievements ADD COLUMN updated_at TEXT');
+
+  const now = new Date().toISOString();
+  db.prepare('UPDATE achievements SET created_at=COALESCE(created_at, ?), updated_at=COALESCE(updated_at, ?)').run(now, now);
+  const defaults = [
+    ['first_connection', 'mission_count', 1], ['troubleshooter', 'mission_count', 5],
+    ['routing_rookie', 'category_routing', 1], ['vlan_master', 'category_vlan', 1],
+    ['no_hints', 'no_hint_completion', 1], ['perfect_engineer', 'perfect_score_count', 3],
+    ['subnet_samurai', 'category_ip_addressing', 1], ['packet_tracer_pro', 'packet_tracer_download_count', 3],
+  ] as const;
+  const updateCondition = db.prepare('UPDATE achievements SET condition_type=?, condition_value=? WHERE slug=?');
+  for (const [slug, type, value] of defaults) updateCondition.run(type, value, slug);
+  const shouldSeedDefault = !db.prepare("SELECT id FROM schema_migrations WHERE id='007_admin_learning_paths_achievements'").get();
+  ensureDefaultLearningPath(shouldSeedDefault);
+}
+
+function migrateAssessmentManagementSchema() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS assessments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      slug TEXT NOT NULL UNIQUE,
+      assessment_type TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS assessment_question_assignments (
+      assessment_id INTEGER NOT NULL,
+      question_id INTEGER NOT NULL,
+      order_index INTEGER NOT NULL,
+      PRIMARY KEY (assessment_id, question_id),
+      FOREIGN KEY (assessment_id) REFERENCES assessments(id) ON DELETE CASCADE,
+      FOREIGN KEY (question_id) REFERENCES assessment_questions(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_assessments_type_active ON assessments(assessment_type,is_active);
+    CREATE INDEX IF NOT EXISTS idx_assessment_question_order ON assessment_question_assignments(assessment_id,order_index);
+  `);
+
+  const resultColumns = db.prepare('PRAGMA table_info(assessment_results)').all() as unknown as TableColumn[];
+  if (!resultColumns.some((column) => column.name === 'assessment_id')) db.exec('ALTER TABLE assessment_results ADD COLUMN assessment_id INTEGER');
+  if (!resultColumns.some((column) => column.name === 'correct_answers')) db.exec('ALTER TABLE assessment_results ADD COLUMN correct_answers INTEGER');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_assessment_results_assessment ON assessment_results(assessment_id,completed_at)');
+
+  const now = new Date().toISOString();
+  const defaults = [
+    ['แบบทดสอบก่อนเรียน', 'network-engineering-pretest', 'pretest', 'ประเมินความรู้พื้นฐานก่อนเริ่มเรียน'],
+    ['แบบทดสอบหลังเรียน', 'network-engineering-posttest', 'posttest', 'ประเมินผลการเรียนรู้หลังทำภารกิจ'],
+  ] as const;
+  for (const [title, slug, type, description] of defaults) {
+    db.prepare(`INSERT OR IGNORE INTO assessments(title,slug,assessment_type,description,is_active,created_at,updated_at)
+      VALUES(?,?,?,?,1,?,?)`).run(title, slug, type, description, now, now);
+  }
+
+  const migrationApplied = db.prepare("SELECT id FROM schema_migrations WHERE id='008_admin_assessment_management'").get();
+  if (!migrationApplied) {
+    const assessments = db.prepare("SELECT id FROM assessments WHERE slug IN ('network-engineering-pretest','network-engineering-posttest')").all() as unknown as Array<{ id: number }>;
+    const questions = db.prepare('SELECT id FROM assessment_questions ORDER BY id').all() as unknown as Array<{ id: number }>;
+    const insert = db.prepare('INSERT OR IGNORE INTO assessment_question_assignments(assessment_id,question_id,order_index) VALUES(?,?,?)');
+    for (const assessment of assessments) questions.forEach((question, index) => insert.run(assessment.id, question.id, index + 1));
+  }
+}
+
+function migrateAuthenticationSchema() {
+  const userColumns = db.prepare('PRAGMA table_info(users)').all() as unknown as TableColumn[];
+  const hasColumn = (name: string) => userColumns.some((column) => column.name === name);
+
+  if (!hasColumn('role')) {
+    db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'");
+  }
+  if (!hasColumn('is_active')) {
+    db.exec('ALTER TABLE users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1');
+  }
+  if (!hasColumn('last_activity')) {
+    db.exec('ALTER TABLE users ADD COLUMN last_activity TEXT');
+  }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS auth_sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token_hash TEXT UNIQUE NOT NULL,
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_auth_sessions_user_id ON auth_sessions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_auth_sessions_expires_at ON auth_sessions(expires_at);
+
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      id TEXT PRIMARY KEY,
+      applied_at TEXT NOT NULL
+    );
+  `);
+
+  db.prepare("UPDATE users SET role = 'user' WHERE role NOT IN ('user', 'admin') OR role IS NULL").run();
+}
+
+function migrateLegacyPasswords() {
+  const users = db.prepare('SELECT id, password_hash FROM users').all() as unknown as Array<{ id: number; password_hash: string }>;
+  const updatePassword = db.prepare('UPDATE users SET password_hash = ? WHERE id = ?');
+
+  for (const user of users) {
+    if (!isPasswordHash(user.password_hash)) {
+      updatePassword.run(hashPassword(user.password_hash), user.id);
+    }
+  }
+}
+
+function migrateFinalQaConsistency() {
+  db.prepare("UPDATE user_progress SET score = 100 WHERE status = 'completed' AND score > 100").run();
+}
+
+function ensureDevelopmentAdmin() {
+  const existingAdmin = db.prepare("SELECT id FROM users WHERE role = 'admin' LIMIT 1").get();
+  if (existingAdmin) return;
+
+  const developmentAdmin = db.prepare("SELECT id FROM users WHERE username = 'cisco_wizard'").get() as { id: number } | undefined;
+  if (developmentAdmin) {
+    db.prepare("UPDATE users SET role = 'admin' WHERE id = ?").run(developmentAdmin.id);
+  }
+}
 
 export function initDatabase() {
   // Create tables
@@ -13,6 +303,9 @@ export function initDatabase() {
       username TEXT UNIQUE NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'user',
+      is_active INTEGER NOT NULL DEFAULT 1,
+      last_activity TEXT,
       level INTEGER DEFAULT 1,
       xp INTEGER DEFAULT 0,
       coins INTEGER DEFAULT 0,
@@ -137,31 +430,125 @@ export function initDatabase() {
       total_questions INTEGER NOT NULL,
       completed_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS user_learning_sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      mission_id INTEGER,
+      session_type TEXT NOT NULL,
+      started_at TEXT NOT NULL,
+      last_activity_at TEXT NOT NULL,
+      ended_at TEXT,
+      active_seconds INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (mission_id) REFERENCES missions(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS activity_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      event_type TEXT NOT NULL,
+      entity_type TEXT,
+      entity_id INTEGER,
+      metadata TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      token_hash TEXT UNIQUE NOT NULL,
+      created_at TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      used_at TEXT,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_learning_sessions_user ON user_learning_sessions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_learning_sessions_activity ON user_learning_sessions(last_activity_at);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_learning_sessions_one_open
+      ON user_learning_sessions(user_id) WHERE ended_at IS NULL;
+    CREATE INDEX IF NOT EXISTS idx_activity_logs_created ON activity_logs(created_at);
+    CREATE INDEX IF NOT EXISTS idx_activity_logs_user ON activity_logs(user_id);
+    CREATE INDEX IF NOT EXISTS idx_activity_logs_event ON activity_logs(event_type);
+    CREATE INDEX IF NOT EXISTS idx_password_reset_user ON password_reset_tokens(user_id);
+    CREATE INDEX IF NOT EXISTS idx_password_reset_expiry ON password_reset_tokens(expires_at);
   `);
+
+  migrateAuthenticationSchema();
+  migrateMissionManagementSchema();
+  migratePacketTracerLabSchema();
+  migrateLearningPathAndAchievementSchema();
+  migrateAssessmentManagementSchema();
 
   // Seed default missions if empty
   const missionCount = db.prepare('SELECT COUNT(*) as count FROM missions').get() as { count: number };
   if (missionCount.count === 0) {
     seedMissions();
   }
+  ensureDefaultLearningPath(false);
 
   // Seed achievements if empty
   const achievementCount = db.prepare('SELECT COUNT(*) as count FROM achievements').get() as { count: number };
   if (achievementCount.count === 0) {
     seedAchievements();
   }
+  migrateLearningPathAndAchievementSchema();
 
   // Seed assessment questions if empty
   const assessmentCount = db.prepare('SELECT COUNT(*) as count FROM assessment_questions').get() as { count: number };
   if (assessmentCount.count === 0) {
     seedAssessmentQuestions();
   }
+  migrateAssessmentManagementSchema();
 
   // Seed default student user if not exists
   const defaultUser = db.prepare('SELECT id FROM users WHERE username = ?').get('cadet_networker');
   if (!defaultUser) {
     seedDefaultUser();
   }
+
+  migrateLegacyPasswords();
+  migrateFinalQaConsistency();
+  ensureDevelopmentAdmin();
+  db.prepare(`
+    INSERT OR IGNORE INTO schema_migrations (id, applied_at)
+    VALUES ('001_rbac_sessions', ?)
+  `).run(new Date().toISOString());
+  db.prepare(`
+    INSERT OR IGNORE INTO schema_migrations (id, applied_at)
+    VALUES ('002_admin_dashboard_last_activity', ?)
+  `).run(new Date().toISOString());
+  db.prepare(`
+    INSERT OR IGNORE INTO schema_migrations (id, applied_at)
+    VALUES ('003_active_learning_activity_tracking', ?)
+  `).run(new Date().toISOString());
+  db.prepare(`
+    INSERT OR IGNORE INTO schema_migrations (id, applied_at)
+    VALUES ('004_admin_user_management', ?)
+  `).run(new Date().toISOString());
+  db.prepare(`
+    INSERT OR IGNORE INTO schema_migrations (id, applied_at)
+    VALUES ('005_admin_mission_management', ?)
+  `).run(new Date().toISOString());
+  db.prepare(`
+    INSERT OR IGNORE INTO schema_migrations (id, applied_at)
+    VALUES ('006_admin_packet_tracer_labs', ?)
+  `).run(new Date().toISOString());
+  db.prepare(`
+    INSERT OR IGNORE INTO schema_migrations (id, applied_at)
+    VALUES ('007_admin_learning_paths_achievements', ?)
+  `).run(new Date().toISOString());
+  db.prepare(`
+    INSERT OR IGNORE INTO schema_migrations (id, applied_at)
+    VALUES ('008_admin_assessment_management', ?)
+  `).run(new Date().toISOString());
+  db.prepare(`
+    INSERT OR IGNORE INTO schema_migrations (id, applied_at)
+    VALUES ('009_final_qa_consistency', ?)
+  `).run(new Date().toISOString());
 }
 
 function seedMissions() {
@@ -1054,7 +1441,7 @@ function seedDefaultUser() {
   const userRes = insertUser.run(
     'cadet_networker',
     'student@capstone.edu',
-    'demo123',
+    hashPassword('demo123'),
     2,
     650,
     1200,
@@ -1071,8 +1458,8 @@ function seedDefaultUser() {
   `);
 
   insertProg.run(userId, 1, 'completed', 100, 100, new Date(Date.now() - 86400000 * 2).toISOString());
-  insertProg.run(userId, 2, 'completed', 120, 120, new Date(Date.now() - 86400000).toISOString());
-  insertProg.run(userId, 3, 'completed', 130, 130, new Date(Date.now() - 43200000).toISOString());
+  insertProg.run(userId, 2, 'completed', 100, 120, new Date(Date.now() - 86400000).toISOString());
+  insertProg.run(userId, 3, 'completed', 100, 130, new Date(Date.now() - 43200000).toISOString());
   insertProg.run(userId, 4, 'in_progress', 65, 0, null); // Mission 04: The Missing Gateway
   insertProg.run(userId, 5, 'unlocked', 0, 0, null);
   insertProg.run(userId, 6, 'unlocked', 0, 0, null);
@@ -1104,7 +1491,7 @@ function seedDefaultUser() {
   ];
 
   mockStudents.forEach((st) => {
-    const res = insertUser.run(st.username, st.email, 'demo123', st.level, st.xp, st.coins, st.streak, new Date().toISOString());
+    const res = insertUser.run(st.username, st.email, hashPassword('demo123'), st.level, st.xp, st.coins, st.streak, new Date().toISOString());
     const mockId = Number(res.lastInsertRowid);
     // Mark random completed missions for mock students
     const mCount = st.level >= 4 ? 8 : st.level * 2;

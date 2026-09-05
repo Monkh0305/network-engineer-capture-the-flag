@@ -30,8 +30,8 @@ export const PacketTracerLabsPage: React.FC<PacketTracerLabsPageProps> = ({ onSe
     }
   };
 
-  const handleDownload = (filename: string) => {
-    const url = api.getLabDownloadUrl(filename);
+  const handleDownload = (filename: string, missionId: number) => {
+    const url = api.getLabDownloadUrl(filename, missionId);
     const link = document.createElement('a');
     link.href = url;
     link.download = filename;
@@ -85,17 +85,26 @@ export const PacketTracerLabsPage: React.FC<PacketTracerLabsPageProps> = ({ onSe
 
       {/* Labs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {missions.map((sourceMission) => {
+        {loading ? Array.from({ length: 6 }, (_, index) => (
+          <div key={`lab-skeleton-${index}`} className="h-[292px] animate-pulse rounded-xl border border-slate-200 bg-white/75 p-5 shadow-sm" aria-hidden="true">
+            <div className="flex justify-between"><div className="h-3 w-16 rounded bg-slate-200" /><div className="h-5 w-24 rounded bg-slate-200" /></div>
+            <div className="mt-5 h-4 w-3/5 rounded bg-slate-200" />
+            <div className="mt-4 h-10 w-full rounded bg-slate-100" />
+            <div className="mt-4 h-3 w-full rounded bg-slate-100" />
+            <div className="mt-2 h-3 w-4/5 rounded bg-slate-100" />
+          </div>
+        )) : missions.filter((mission) => Boolean(mission.packet_tracer_file)).map((sourceMission, index) => {
           const m = localizeMission(sourceMission, language);
           return (
           <div
             key={m.id}
-            className="dashboard-content-card p-5 rounded-xl bg-[#111820] border border-[#263241] hover:border-[#F5C542]/50 transition-all flex flex-col justify-between space-y-4 shadow-md hover:-translate-y-1 hover:shadow-lg"
+            style={{ animationDelay: `${Math.min(index, 8) * 55}ms` }}
+            className="data-card-enter dashboard-content-card p-5 rounded-xl bg-[#111820] border border-[#263241] hover:border-[#F5C542]/50 transition-all flex flex-col justify-between space-y-4 shadow-md hover:-translate-y-1 hover:shadow-lg"
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono text-[#8D9BA8]">
-                  {language === 'th' ? 'ภารกิจ' : 'MISSION'} {String(m.order_index).padStart(2, '0')}
+                  {language === 'th' ? 'ภารกิจ' : 'MISSION'} {String(m.mission_number ?? m.order_index).padStart(2, '0')}
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#00C2FF]/10 text-[#00C2FF] border border-[#00C2FF]/30">
                   {m.category}
@@ -108,7 +117,7 @@ export const PacketTracerLabsPage: React.FC<PacketTracerLabsPageProps> = ({ onSe
 
               <div className="p-2.5 rounded bg-[#0B0F14] border border-[#263241] font-mono text-xs flex items-center justify-between text-[#F5C542]">
                 <span className="truncate">{m.packet_tracer_file}</span>
-                <span className="text-[10px] text-[#8D9BA8] ml-2">.pka</span>
+                <span className="text-[10px] uppercase text-[#8D9BA8] ml-2">.{m.packet_tracer_file.split('.').pop()}</span>
               </div>
 
               <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] text-[#8D9BA8]">
@@ -123,11 +132,11 @@ export const PacketTracerLabsPage: React.FC<PacketTracerLabsPageProps> = ({ onSe
 
             <div className="pt-2 border-t border-[#263241]/70 flex items-center justify-between gap-2">
               <button
-                onClick={() => handleDownload(m.packet_tracer_file)}
+                onClick={() => handleDownload(m.packet_tracer_file, m.id)}
                 className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-cyan-300/30 bg-gradient-to-r from-cyan-500 to-violet-600 px-3 py-2.5 font-mono text-xs font-bold text-white shadow-[0_8px_24px_rgba(34,211,238,0.18)] transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(139,92,246,0.24)]"
               >
                 <Download className="w-3.5 h-3.5 text-[#F5C542]" />
-                <span>{t('pt.download_pka')}</span>
+                <span>{language === 'th' ? `ดาวน์โหลด .${m.packet_tracer_file.split('.').pop()?.toUpperCase()}` : `Download .${m.packet_tracer_file.split('.').pop()?.toUpperCase()}`}</span>
               </button>
 
               <button

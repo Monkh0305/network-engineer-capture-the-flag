@@ -156,7 +156,7 @@ export const MissionsListPage: React.FC<MissionsListPageProps> = ({
             </button>
           ))}
           <span className="text-[11px] font-mono text-[#8D9BA8] ml-auto">
-            {t('missions.showing')} {filteredMissions.length} {t('missions.of')} {missions.length} {language === 'th' ? 'ภารกิจ' : 'Missions'}
+            {t('missions.showing')} {loading ? '—' : filteredMissions.length} {t('missions.of')} {loading ? '—' : missions.length} {language === 'th' ? 'ภารกิจ' : 'Missions'}
           </span>
         </div>
 
@@ -196,7 +196,17 @@ export const MissionsListPage: React.FC<MissionsListPageProps> = ({
 
       {/* Missions Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {filteredMissions.map((sourceMission) => {
+        {loading ? Array.from({ length: 6 }, (_, index) => (
+          <div key={`mission-skeleton-${index}`} className="h-[237px] animate-pulse rounded-xl border border-slate-200 bg-white/75 shadow-sm" aria-hidden="true">
+            <div className="space-y-4 p-5">
+              <div className="flex justify-between"><div className="h-3 w-16 rounded bg-slate-200" /><div className="h-5 w-24 rounded bg-slate-200" /></div>
+              <div className="h-4 w-3/5 rounded bg-slate-200" />
+              <div className="h-3 w-full rounded bg-slate-100" />
+              <div className="h-3 w-4/5 rounded bg-slate-100" />
+              <div className="mt-7 h-1.5 w-full rounded bg-slate-200" />
+            </div>
+          </div>
+        )) : filteredMissions.map((sourceMission, index) => {
           const mission = localizeMission(sourceMission, language);
           const isLocked = mission.status === 'locked';
           const isCompleted = mission.status === 'completed';
@@ -206,8 +216,9 @@ export const MissionsListPage: React.FC<MissionsListPageProps> = ({
             <div
               key={mission.id}
               id={`mission-card-${mission.order_index}`}
+              style={{ animationDelay: `${Math.min(index, 8) * 55}ms` }}
               onClick={() => !isLocked && onSelectMission(mission.id)}
-              className={`dashboard-content-card group rounded-xl border p-5 flex flex-col justify-between space-y-4 transition-all duration-200 ${
+              className={`data-card-enter dashboard-content-card group rounded-xl border p-5 flex flex-col justify-between space-y-4 transition-all duration-200 ${
                 isLocked
                   ? 'bg-[#0B0F14]/60 border-[#263241]/60 opacity-60 cursor-not-allowed'
                   : 'bg-[#111820] border-[#263241] cursor-pointer hover:-translate-y-1 hover:border-[#F5C542] hover:shadow-[0_4px_25px_rgba(245,197,66,0.18)]'
@@ -217,7 +228,7 @@ export const MissionsListPage: React.FC<MissionsListPageProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono text-[#8D9BA8]">
-                    {language === 'th' ? 'ภารกิจ' : 'MISSION'} {String(mission.order_index).padStart(2, '0')}
+                    {language === 'th' ? 'ภารกิจ' : 'MISSION'} {String(mission.mission_number ?? mission.order_index).padStart(2, '0')}
                   </span>
 
                   <div className="flex items-center gap-2">

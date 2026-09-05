@@ -16,14 +16,14 @@ export const AssessmentPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    loadAssessment();
-  }, []);
+    void loadAssessment();
+  }, [activeTest]);
 
   const loadAssessment = async () => {
     try {
       setLoading(true);
       const [qRes, rRes] = await Promise.all([
-        api.getAssessmentQuestions(),
+        api.getAssessmentQuestions(activeTest),
         api.getAssessmentResults()
       ]);
       setQuestions(qRes.questions);
@@ -145,7 +145,7 @@ export const AssessmentPage: React.FC = () => {
             <div className="p-3 rounded-xl bg-[#0B0F14] border border-[#2ECC71]/40 text-center">
               <span className="text-[10px] text-[#2ECC71] font-mono uppercase">{t('assess.growth')}</span>
               <div className="text-xl font-black text-[#2ECC71] font-mono">
-                {assessmentResults.improvement !== null ? `+${assessmentResults.improvement}%` : '—'}
+                {assessmentResults.improvement !== null ? `${assessmentResults.improvement > 0 ? '+' : ''}${assessmentResults.improvement} ${language === 'th' ? 'จุดเปอร์เซ็นต์' : 'pp'}` : '—'}
               </div>
             </div>
           </div>
@@ -172,6 +172,7 @@ export const AssessmentPage: React.FC = () => {
 
       {/* Questions Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
+        {!loading && questions.length === 0 && <div className="rounded-2xl border border-dashed border-[#263241] bg-[#111820] p-8 text-center text-sm text-[#8D9BA8]">{language === 'th' ? 'ยังไม่มีแบบทดสอบที่เปิดใช้งานในขณะนี้' : 'No active assessment is currently available.'}</div>}
         {questions.map((sourceQuestion, idx) => {
           const q = localizeAssessmentQuestion(sourceQuestion, language);
           const selected = answers[q.id];
@@ -225,7 +226,7 @@ export const AssessmentPage: React.FC = () => {
         <div className="flex justify-end pt-4">
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || questions.length === 0}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F5C542] px-8 py-3 text-xs font-bold text-[#0B0F14] shadow-[0_0_20px_rgba(245,197,66,0.3)] transition-all hover:bg-[#F5C542]/90 sm:w-auto"
           >
             <span>{submitting ? (language === 'th' ? 'กำลังคำนวณคะแนน...' : 'Calculating Score...') : (language === 'th' ? 'ส่งแบบทดสอบ' : `Submit ${activeTest === 'pretest' ? 'Pre-Test' : 'Post-Test'}`)}</span>

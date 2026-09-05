@@ -17,13 +17,13 @@ export const FlagSubmissionCard: React.FC<FlagSubmissionCardProps> = ({
   onNextMission
 }) => {
   const { language, t } = useLanguage();
-  const [flagInput, setFlagInput] = useState(mission.status === 'completed' ? mission.target_flag : '');
+  const [flagInput, setFlagInput] = useState(mission.status === 'completed' ? (mission.target_flag || '') : '');
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [completionResult, setCompletionResult] = useState<any>(
     mission.status === 'completed' ? {
       success: true,
-      flag: mission.target_flag,
+      flag: mission.target_flag || '',
       xpEarned: mission.xp_earned || mission.xp_reward,
       coinsEarned: 500
     } : null
@@ -103,7 +103,7 @@ export const FlagSubmissionCard: React.FC<FlagSubmissionCardProps> = ({
           <div className="max-w-md mx-auto p-3.5 bg-[#0B0F14] rounded-lg border border-[#F5C542]/40 shadow-inner">
             <div className="text-[10px] uppercase font-mono text-[#8D9BA8] mb-1">{language === 'th' ? 'รหัสธงที่ยืนยันแล้ว' : 'Authenticated Flag Token'}</div>
             <div className="font-mono text-sm font-bold text-[#F5C542] tracking-wider selection:bg-[#F5C542]/20">
-              {completionResult?.flag || mission.target_flag}
+              {completionResult?.flag || mission.target_flag || 'FLAG{VERIFIED}'}
             </div>
           </div>
 
@@ -156,16 +156,10 @@ export const FlagSubmissionCard: React.FC<FlagSubmissionCardProps> = ({
               />
             </div>
 
-            {/* Quick Autofill Helper for Testing Graders */}
-            <div className="flex items-center justify-between text-[11px] pt-1">
-              <span className="text-[#8D9BA8]">{language === 'th' ? 'พบรหัสจากแล็บ Packet Tracer แล้วใช่ไหม?' : 'Discovered in Packet Tracer Lab?'}</span>
-              <button
-                type="button"
-                onClick={() => setFlagInput(mission.target_flag)}
-                className="text-[#00C2FF] hover:underline font-mono"
-              >
-                {t('room.paste_flag')}
-              </button>
+            <div className="pt-1 text-[11px] text-[#8D9BA8]">
+              {language === 'th'
+                ? 'นำรหัสธงที่ค้นพบจากแล็บ Packet Tracer มากรอกในช่องด้านบน'
+                : 'Enter the flag discovered while completing the Packet Tracer lab.'}
             </div>
           </div>
 

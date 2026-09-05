@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Award, Bell, BookOpen, ChevronDown, ClipboardCheck, Crosshair, Flame,
   Languages, LayoutDashboard, LogOut, Menu, Moon, Search, Star, Sun,
-  Terminal, Trophy, User as UserIcon, Users, X,
+  ShieldCheck, Terminal, Trophy, User as UserIcon, Users, X,
 } from 'lucide-react';
 import { User } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
@@ -35,6 +35,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   const displayUser = user || {
     id: 1, username: 'cadet_networker', email: 'student@capstone.edu', level: 2,
     total_xp: 1240, coins: 450, streak_days: 7, missions_completed: 3, flags_captured: 3,
+    role: 'user' as const, is_active: 1, created_at: '',
   };
 
   const topNavItems = [
@@ -57,7 +58,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   return (
     <>
       <header id="top-navbar" className="tech-navbar fixed inset-x-0 top-0 z-50 flex h-20 items-center justify-between border-b border-[#34383D] bg-[#17191C] px-4 shadow-[0_8px_24px_rgba(0,0,0,0.16)] sm:px-5 lg:h-24 xl:px-8">
-        <div className="flex min-w-0 flex-1 items-center gap-2.5 xl:gap-5">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 min-[2100px]:gap-5">
           <button
             type="button"
             onClick={() => { setShowNotifications(false); setShowProfileDropdown(false); onToggleMobileMenu(); }}
@@ -82,14 +83,14 @@ export const TopNav: React.FC<TopNavProps> = ({
             </div>
             <div className="hidden whitespace-nowrap sm:block">
               <div className="text-[15px] font-black leading-none tracking-tight text-white lg:text-base">Network <span className="text-cyan-300">CTF</span></div>
-              <div className="mt-1.5 hidden text-[10px] font-mono uppercase tracking-[0.14em] text-[#9CA3AF] xl:block">
+              <div className="mt-1.5 hidden text-[10px] font-mono uppercase tracking-[0.14em] text-[#9CA3AF] min-[2100px]:block">
                 {language === 'th' ? 'เรียนรู้ • ตั้งค่า • แก้ปัญหา' : 'LEARN • CONFIGURE • TROUBLESHOOT'}
               </div>
             </div>
           </button>
 
-          <nav className="hidden min-w-0 items-center gap-1 lg:flex" aria-label={language === 'th' ? 'เมนูหลัก' : 'Main navigation'}>
-            {topNavItems.filter((item) => item.id !== 'assessment').map((item) => {
+          <nav className="hidden min-w-0 items-center gap-0.5 lg:flex min-[2100px]:gap-1" aria-label={language === 'th' ? 'เมนูหลัก' : 'Main navigation'}>
+            {topNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
               return (
@@ -98,13 +99,13 @@ export const TopNav: React.FC<TopNavProps> = ({
                   id={`topnav-tab-${item.id}`}
                   type="button"
                   onClick={() => goTo(item.id)}
-                  className={`relative flex h-14 shrink-0 items-center gap-2.5 whitespace-nowrap rounded-[14px] px-3.5 text-[15px] font-semibold transition-colors ${isActive ? 'bg-cyan-400/10 text-cyan-300 ring-1 ring-inset ring-cyan-300/15' : 'text-slate-300 hover:bg-white/[0.06] hover:text-white'}`}
+                  className={`relative flex h-14 shrink-0 items-center gap-2 whitespace-nowrap rounded-[14px] px-2.5 text-sm font-semibold transition-colors min-[2100px]:gap-2.5 min-[2100px]:px-3.5 min-[2100px]:text-[15px] ${isActive ? 'bg-cyan-400/10 text-cyan-300 ring-1 ring-inset ring-cyan-300/15' : 'text-slate-300 hover:bg-white/[0.06] hover:text-white'}`}
                   title={item.label}
                   aria-current={isActive ? 'page' : undefined}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
-                  <span className={`hidden ${item.id === 'assessment' ? 'min-[2150px]:inline' : 'min-[1800px]:inline'}`}>{item.label}</span>
-                  {isActive && <span className="absolute inset-x-3.5 -bottom-5 h-[3px] rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 shadow-[0_0_12px_rgba(34,211,238,0.45)]" />}
+                  <span className="hidden min-[1800px]:inline">{item.label}</span>
+                  {isActive && <span className="topnav-active-indicator absolute inset-x-2.5 -bottom-5 h-[3px] rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 shadow-[0_0_12px_rgba(34,211,238,0.45)] min-[2100px]:inset-x-3.5" />}
                 </button>
               );
             })}
@@ -166,6 +167,7 @@ export const TopNav: React.FC<TopNavProps> = ({
             {showProfileDropdown && (
               <div className="fixed left-3 right-3 top-[5.5rem] rounded-2xl border border-[#34383D] bg-[#1C1F23] p-2 text-sm shadow-2xl sm:absolute sm:left-auto sm:right-0 sm:top-[4.5rem] sm:w-64">
                 <button type="button" onClick={() => { onNavigateProfile(); setShowProfileDropdown(false); }} className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-slate-300 hover:bg-white/[0.06] hover:text-white"><UserIcon className="h-4 w-4 text-[#4ADE80]" />{language === 'th' ? 'ข้อมูลผู้ใช้' : 'View Profile'}</button>
+                {displayUser.role === 'admin' && <button type="button" onClick={() => goTo('admin')} className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-cyan-300 hover:bg-cyan-400/10 hover:text-cyan-200"><ShieldCheck className="h-4 w-4" />{language === 'th' ? 'กลับไปยัง Admin Panel' : 'Return to Admin Panel'}</button>}
                 <button type="button" onClick={() => goTo('assessment')} className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-slate-300 hover:bg-white/[0.06] hover:text-white"><Award className="h-4 w-4 text-[#FB923C]" />{language === 'th' ? 'แบบประเมินก่อนและหลังเรียน' : 'Pre/Post Assessment'}</button>
                 {onLogout && <button type="button" onClick={() => { onLogout(); setShowProfileDropdown(false); }} className="mt-1 flex w-full items-center gap-2 border-t border-[#34383D] px-3 py-2.5 text-left text-red-400 hover:bg-red-500/10 hover:text-red-300"><LogOut className="h-4 w-4" />{t('nav.logout')}</button>}
               </div>
@@ -194,7 +196,9 @@ export const TopNav: React.FC<TopNavProps> = ({
               })}
             </div>
             <div className="mt-3 flex items-center justify-between border-t border-[#34383D] pt-3">
-              <button type="button" onClick={() => { onNavigateProfile(); onCloseMobileMenu(); }} className="flex items-center gap-2 text-sm font-semibold text-slate-200"><UserIcon className="h-4 w-4 text-[#4ADE80]" />{language === 'th' ? 'ข้อมูลผู้ใช้' : 'Profile'}</button>
+              {displayUser.role === 'admin'
+                ? <button type="button" onClick={() => goTo('admin')} className="flex items-center gap-2 text-sm font-semibold text-cyan-300"><ShieldCheck className="h-4 w-4" />Admin Panel</button>
+                : <button type="button" onClick={() => { onNavigateProfile(); onCloseMobileMenu(); }} className="flex items-center gap-2 text-sm font-semibold text-slate-200"><UserIcon className="h-4 w-4 text-[#4ADE80]" />{language === 'th' ? 'ข้อมูลผู้ใช้' : 'Profile'}</button>}
               {onLogout && <button type="button" onClick={onLogout} className="flex items-center gap-2 text-sm font-semibold text-red-400"><LogOut className="h-4 w-4" />{t('nav.logout')}</button>}
             </div>
           </nav>
